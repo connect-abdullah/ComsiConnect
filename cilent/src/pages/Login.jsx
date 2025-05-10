@@ -1,17 +1,79 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'
+import axios from 'axios'
+import { loginUser } from '../api/api'
 
 const Login = () => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Handle login logic here
-    console.log('Login attempt with:', { email, password })
-  }
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // State variables
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  
+  // Check for success message from redirect (like after signup)
+  useEffect(() => {
+    if (location.state?.successMessage) {
+      setSuccessMessage(location.state.successMessage);
+      
+      // Clear the success message from location state
+      window.history.replaceState({}, document.title);
+      
+      // Auto-hide the success message after 5 seconds
+      const timer = setTimeout(() => {
+        setSuccessMessage('');
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+        const credentials = { username: username.toUpperCase(), password };
+      // Make login request to your API
+      const response = await loginUser(credentials);
+      
+      console.log('Login successful:', response);
+      
+      // Store the token
+      if (response?.data?.token) {
+        localStorage.setItem('authToken', response.token);
+      }
+      
+      // Store user information if needed
+      if (response?.data?.user) {
+        localStorage.setItem('user', JSON.stringify(response?.user));
+      }
+      
+      // Redirect to feed or dashboard
+      navigate('/profile');
+      
+    } catch (err) {
+      console.error('Login error:', err);
+      
+      // Handle error responses
+      if (err.response) {
+        setError(err.response.data.message || 'Invalid username or password');
+      } else if (err.request) {
+        setError('No response from server. Please try again later.');
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="bg-zinc-900 text-white min-h-screen flex flex-col">
@@ -48,23 +110,37 @@ const Login = () => {
 
             {/* Form Body */}
             <div className="p-6">
+              {/* Success Message */}
+              {successMessage && (
+                <div className="mb-6 p-3 bg-green-600/20 border border-green-500 rounded-md text-green-200 text-center">
+                  {successMessage}
+                </div>
+              )}
+              
+              {/* Error Message */}
+              {error && (
+                <div className="mb-6 p-3 bg-red-500/20 border border-red-500 rounded-md text-red-200 text-center">
+                  {error}
+                </div>
+              )}
+              
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Email Field */}
+                {/* Username Field */}
                 <div className="space-y-2">
-                  <label htmlFor="email" className="block text-sm font-medium text-zinc-300">Email Address</label>
+                  <label htmlFor="username" className="block text-sm font-medium text-zinc-300">Username</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <FaEnvelope className="text-zinc-500" />
                     </div>
                     <input
-                      id="email"
-                      name="email"
-                      type="email"
+                      id="username"
+                      name="username"
+                      type="text"
                       required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       className="block w-full pl-10 pr-3 py-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white"
-                      placeholder="you@example.com"
+                      placeholder="Enter your username"
                     />
                   </div>
                 </div>
@@ -105,13 +181,26 @@ const Login = () => {
                   </Link>
                 </div>
 
-                {/* Submit Button */}
+                {/* Submit Button with Loading State */}
                 <div>
                   <button
                     type="submit"
-                    className="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-md font-medium transition duration-300"
+                    disabled={isLoading}
+                    className={`w-full px-4 py-3 ${
+                      isLoading ? 'bg-indigo-700 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
+                    } rounded-md font-medium transition duration-300 flex items-center justify-center`}
                   >
-                    Sign In
+                    {isLoading ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Signing In...
+                      </>
+                    ) : (
+                      'Sign In'
+                    )}
                   </button>
                 </div>
               </form>

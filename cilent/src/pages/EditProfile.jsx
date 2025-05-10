@@ -1,18 +1,41 @@
-import React, { useState, useRef } from 'react'
-import { motion } from 'framer-motion'
+import React, { useState, useRef, useEffect} from 'react'
+import { useLocation } from 'react-router-dom';
 import { FaCamera, FaArrowLeft, FaTimes } from 'react-icons/fa'
+import Navbar from '../components/Navbar';
+import { updateUser } from '../api/api';
+
 
 const EditProfile = () => {
-  // Mock initial user data
+
+  const location = useLocation();
+  const {user} = location?.state || {};
+  // console.log("user --> ",user);
+  
+
   const [formData, setFormData] = useState({
-    displayName: "Farhan Ahmed",
-    username: "farhan_ahmed",
-    avatar: "FA",
-    bio: "Computer Science student at COMSATS University | Web Developer | AI Enthusiast",
-    email: "farhan.ahmed@gmail.com",
-    department: "Computer Science",
-    yearOfStudy: "3rd Year"
+    username: "",
+    fullName: "",
+    avatar: "",
+    bio: "",
+    email: "",
+    department: "",
+    yearOfStudy: ""
   });
+  
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        username: user?.username,
+        fullName: user?.fullName,
+        avatar: user?.avatar,
+        bio: user?.bio,
+        email: user?.email,
+        department: user?.department,
+        yearOfStudy: user?.yearOfStudy
+      });
+      // console.log("User loaded:", user);
+    }
+  }, [user]);
   
   const [newAvatar, setNewAvatar] = useState(null);
   const [previewAvatar, setPreviewAvatar] = useState(null);
@@ -51,66 +74,44 @@ const EditProfile = () => {
   };
   
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    
-    // Simulate API call delay
-    setTimeout(() => {
-      console.log('Profile updated:', formData);
-      console.log('New avatar:', newAvatar);
-      
-      setSaving(false);
+  
+    try {
+      const data = new FormData();
+  
+      // Append all form fields
+      for (const key in formData) {
+        data.append(key, formData[key]);
+      }
+  
+      // Append the new avatar file (if selected)
+      if (newAvatar) {
+        data.append('file', newAvatar);
+      }
+  
+      const response = await updateUser(data); 
+      console.log('Profile updated:', response);
+  
       setSaveSuccess(true);
-      
-      // Reset success message after 3 seconds
+  
+      // Redirect after a short delay
       setTimeout(() => {
-        setSaveSuccess(false);
-      }, 3000);
-    }, 1500);
+        window.location.href = '/profile';
+      }, 1000);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    } finally {
+      setSaving(false);
+    }
   };
+  
   
   return (
     <div className="bg-zinc-900 text-white min-h-screen">
       {/* Navbar with Feed Links */}
-      <nav className="sticky top-0 z-50 bg-zinc-800/80 backdrop-blur-sm px-6 py-4 flex justify-between items-center border-b border-zinc-700">
-        {/* Logo */}
-        <a href="/" className="flex items-center gap-2">
-          <motion.div
-            initial={{ rotate: -10 }}
-            animate={{ rotate: 10 }}
-            transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
-            className="bg-indigo-600 w-8 h-8 rounded-lg flex items-center justify-center"
-          >
-            <span className="font-bold">C</span>
-          </motion.div>
-          <span className="font-bold text-xl">COMSATS Connect</span>
-        </a>
-        
-        {/* Feed Nav Links */}
-        <div className="hidden md:flex items-center gap-8">
-          <a href="/feed" className="text-zinc-300 hover:text-white transition">Feed</a>
-          <a href="/explore" className="text-zinc-300 hover:text-white transition">Explore</a>
-          <a href="/notifications" className="text-zinc-300 hover:text-white transition">Notifications</a>
-          <a href="/profile" className="text-white border-b-2 border-indigo-500 pb-1">Profile</a>
-        </div>
-        
-        {/* User Avatar */}
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-indigo-600 rounded-full flex items-center justify-center cursor-pointer">
-            <span className="font-medium text-sm">
-              {previewAvatar ? '' : formData.avatar}
-              {previewAvatar && (
-                <img 
-                  src={previewAvatar} 
-                  alt="Preview" 
-                  className="w-full h-full rounded-full object-cover"
-                />
-              )}
-            </span>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="max-w-3xl mx-auto px-4 py-6">
         {/* Page Header */}
@@ -130,14 +131,16 @@ const EditProfile = () => {
           <div className="mb-8 flex flex-col items-center">
             <div className="relative mb-4">
               <div className="w-32 h-32 bg-indigo-600 rounded-full flex items-center justify-center overflow-hidden">
-                {previewAvatar ? (
+                {previewAvatar || formData?.avatar ? (
                   <img 
-                    src={previewAvatar} 
-                    alt="Preview" 
+                    src={previewAvatar || formData?.avatar}
+                    alt="Profile" 
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="font-bold text-3xl">{formData.avatar}</span>
+                  <span className="font-bold text-3xl">
+                    {formData?.fullName?.slice(0,2)}
+                  </span>
                 )}
               </div>
               
@@ -177,14 +180,14 @@ const EditProfile = () => {
             
             {/* Display Name */}
             <div>
-              <label htmlFor="displayName" className="block text-sm font-medium text-zinc-300 mb-2">
+              <label htmlFor="fullName" className="block text-sm font-medium text-zinc-300 mb-2">
                 Display Name
               </label>
               <input
                 type="text"
-                id="displayName"
-                name="displayName"
-                value={formData.displayName}
+                id="fullName"
+                name="fullName"
+                value={formData?.fullName}
                 onChange={handleChange}
                 className="w-full bg-zinc-700 border border-zinc-600 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
@@ -202,7 +205,7 @@ const EditProfile = () => {
                   type="text"
                   id="username"
                   name="username"
-                  value={formData.username}
+                  value={formData?.username}
                   onChange={handleChange}
                   className="flex-1 bg-zinc-700 border border-zinc-600 rounded-r-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   required
@@ -219,7 +222,7 @@ const EditProfile = () => {
                 type="email"
                 id="email"
                 name="email"
-                value={formData.email}
+                value={formData?.email}
                 onChange={handleChange}
                 className="w-full bg-zinc-700 border border-zinc-600 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
@@ -235,7 +238,7 @@ const EditProfile = () => {
                 id="bio"
                 name="bio"
                 rows="4"
-                value={formData.bio}
+                value={formData?.bio}
                 onChange={handleChange}
                 className="w-full bg-zinc-700 border border-zinc-600 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="Tell us about yourself..."
@@ -255,7 +258,7 @@ const EditProfile = () => {
               <select
                 id="department"
                 name="department"
-                value={formData.department}
+                value={formData?.department}
                 onChange={handleChange}
                 className="w-full bg-zinc-700 border border-zinc-600 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
@@ -276,7 +279,7 @@ const EditProfile = () => {
               <select
                 id="yearOfStudy"
                 name="yearOfStudy"
-                value={formData.yearOfStudy}
+                value={formData?.yearOfStudy}
                 onChange={handleChange}
                 className="w-full bg-zinc-700 border border-zinc-600 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
@@ -322,6 +325,9 @@ const EditProfile = () => {
           {saveSuccess && (
             <div className="mt-4 p-3 bg-green-600/20 border border-green-500 rounded-md text-green-200 text-center">
               Profile updated successfully!
+              {setTimeout(() => {
+                window.location.href = '/profile';
+              }, 1000)}
             </div>
           )}
         </form>
