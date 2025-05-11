@@ -33,7 +33,8 @@ export const signupUser = async (userData) => {
   export const logoutUser = async () => {
     try {
       const response = await api.get('/users/logout');
-      return response.data;
+      console.log("response from api js (logout) --> ",response);
+      return response;
     } catch (error) {
       throw error;
     }
@@ -112,6 +113,37 @@ export const interaction = async (postId, interactionType) => {
 
 
 
+
+
+// Profile Routes
+// Get all posts for signed user
+export const getUserPosts = async () => {
+    try {
+        const response = await api.get('/users/posts');
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+// Update a post
+export const updatePost = async (postId, content) => {
+  const response = await api.put(`/users/posts/${postId}`, content);
+  return response.data;
+};
+
+// Delete a post
+export const deletePost = async (postId) => {
+  const response = await api.delete(`/users/posts/${postId}`);
+  // console.log("response from api js (delete post) --> ",response);
+  return response;
+};
+
+
+
+
+
+
 // Confessions Routes
 // Get or create anonymous ID for the current user
 export const getAnonymousID = async () => {
@@ -152,6 +184,37 @@ export const getConfessions = async () => {
 export const interactWithConfession = async (confessionId, interactionType) => {
   try {
     const response = await api.put(`/confessions/post/${confessionId}`, { interactionType });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get all confessions for signed user
+export const getMyConfessions = async () => {
+  try {
+    const response = await api.get('/confessions/my-posts');
+    // console.log("response from api js --> ",response);  
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Update a confession
+export const updateConfession = async (postId,content) => {
+  try {
+    const response = await api.put(`/confessions/my-posts/${postId}`, content);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Delete a confession
+export const deleteConfession = async (postId) => {
+  try {
+    const response = await api.delete(`/confessions/my-posts/${postId}`);
     return response.data;
   } catch (error) {
     throw error;

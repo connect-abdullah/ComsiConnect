@@ -89,6 +89,8 @@ const Navbar = () => {
             {/* Dropdown Menu */}
             <div className="absolute right-0 mt-2 w-48 bg-zinc-800 rounded-md overflow-hidden shadow-lg border border-zinc-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right">
               <div className="py-1">
+                <Link to="/feed" className="block px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-700">Feed</Link>
+                <Link to="/confessions" className="block px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-700">Confessions</Link>
                 <Link to="/profile" className="block px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-700">Your Profile</Link>
                 {/* <Link to="/edit-profile" className="block px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-700">Edit Profile</Link> */}
                 {/* <Link to="/settings" className="block px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-700">Settings</Link> */}

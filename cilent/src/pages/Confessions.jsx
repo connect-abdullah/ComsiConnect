@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaHeart, FaRetweet, FaBookmark, FaImage, FaTimes, FaRegHeart, FaRegBookmark, FaUser } from 'react-icons/fa'
 import Navbar from '../components/Navbar'
@@ -164,10 +165,17 @@ const Confessions = () => {
       <div className="max-w-3xl mx-auto px-4 py-6">
         {/* Page Header with Explanation */}
         <div className="bg-zinc-800/50 rounded-xl p-4 mb-6 border border-zinc-700">
-          <h1 className="text-xl font-bold mb-2">COMSATS Confessions</h1>
-          <p className="text-zinc-400">Share your thoughts anonymously. Your hidden identity is <span className="text-indigo-400 font-mono">{anonymousID}</span></p>
+          <div className="flex justify-between items-center">
+            <h1 className="text-xl font-bold">COMSATS Confessions</h1>
+            <Link 
+              to="/my-confessions" 
+              className="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white font-medium transition flex items-center gap-2"
+            >
+              My Confessions <span className="text-lg">→</span>
+            </Link>
+          </div>
+          <p className="text-zinc-400 mt-2">Share your thoughts anonymously. Your hidden identity is <span className="text-indigo-400 font-mono">{anonymousID}</span></p>
         </div>
-        
         {/* Confession Creation Section */}
         <div className="bg-zinc-800 rounded-xl border border-zinc-700 p-4 mb-8">
           <div className="flex gap-3">
@@ -273,7 +281,7 @@ const Confessions = () => {
               
               {/* Confession Images */}
               {confession.images?.length > 0 && (
-                <div className={`grid ${confession.images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-2 mb-4`}>
+                <div className={`grid ${confession.images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-2 mb-4 mt-2 pt-3 border-t border-zinc-700`}>
                   {confession.images.map((image, index) => (
                     <img 
                       key={index}

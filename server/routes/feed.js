@@ -13,8 +13,8 @@ passport.use(new LocalStrategy(User.authenticate()));
 
 // Feed post api
 router.post('/post', upload.array('images', 5), async (req, res) => {
-  const { content } = req.body;
-  const user = await User.findOne({ username: req.session.passport.user });
+  const { content } = req?.body;
+  const user = await User.findOne({ username: req?.session?.passport?.user });
   // console.log("user --> ",user);
 
   if (!user) {
@@ -22,37 +22,37 @@ router.post('/post', upload.array('images', 5), async (req, res) => {
   }
 
   let imageUrl = null;
-  if (req.file) {
-    imageUrl = req.file.path;
+  if (req?.file) {
+    imageUrl = req?.file?.path;
   }
  // saving post
   const post = new Post({ 
     content,
-    user: user._id 
+    user: user?._id 
   });
 
-  if (req.files) {
-    req.files.forEach(file => {
-      post.images.push(file.path);
+  if (req?.files) {
+    req?.files?.forEach(file => {
+      post.images.push(file?.path);
     });
   }
   await post.save();
   // saving post id into user model
-  user.posts.push(post._id);
+  user.posts.push(post?._id);
   // updating posts count
   user.postsCount = user.posts.length;
   await user.save();
   // populating post
-  const populatedPost = await post.populate('user');
+  const populatedPost = await post?.populate('user');
   res.status(200).json(populatedPost);
   // console.log("post from feed js --> ", populatedPost);
 });
 
 // Feed interaction api
 router.put('/post/:postId', async (req, res) => {
-  const { postId } = req.params;
-  const { interactionType } = req.body;
-  const user = await User.findOne({ username: req.session.passport.user });
+  const { postId } = req?.params;
+  const { interactionType } = req?.body;
+  const user = await User.findOne({ username: req?.session?.passport?.user });
   const post = await Post.findById(postId);
 
   if (!post) return res.status(404).json({ message: 'Post not found' });
@@ -79,15 +79,15 @@ router.put('/post/:postId', async (req, res) => {
   post[interaction.flag] = !post[interaction.flag];
   
   if (post[interaction.flag]) {
-    post[interaction.postArray].push(user._id);
-    user[interaction.userArray].push(post._id);
+    post[interaction.postArray].push(user?._id);
+    user[interaction.userArray].push(post?._id);
   } else {
-    post[interaction.postArray].pull(user._id);
-    user[interaction.userArray].pull(post._id);
+    post[interaction.postArray].pull(user?._id);
+    user[interaction.userArray].pull(post?._id);
   }
 
   await Promise.all([post.save(), user.save()]);
-  const populatedPost = await post.populate('user');
+  const populatedPost = await post?.populate('user');
   res.status(200).json(populatedPost);
 });
 

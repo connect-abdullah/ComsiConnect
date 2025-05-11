@@ -1,13 +1,14 @@
 import { Routes, Route } from "react-router-dom";
-import Home from './pages/Home';
-import Login from './pages/login';
-import Signup from "./pages/Signup";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
+import Home from './pages/landingPage/Home';
+import Login from './pages/auth/Login';
+import Signup from "./pages/auth/Signup";
+import About from "./pages/landingPage/About";
+import Contact from "./pages/landingPage/Contact";
 import Feed from "./pages/Feed";
-import Profile from "./pages/Profile";
-import EditProfile from "./pages/EditProfile";
+import Profile from "./pages/profileSection/Profile";
+import EditProfile from "./pages/profileSection/EditProfile";
 import Confessions from "./pages/Confessions";
+import MyConfessions from "./pages/MyConfessions";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/edit-profile" element={<EditProfile />} />
       <Route path="/confessions" element={<Confessions />} />
+      <Route path="/my-confessions" element={<MyConfessions />} />
     </Routes>
   );
 }

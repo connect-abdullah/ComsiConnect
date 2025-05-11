@@ -2,8 +2,8 @@ import React from 'react'
 import { motion } from 'framer-motion' // Animation library
 import { FaUserFriends, FaComments, FaGraduationCap } from 'react-icons/fa' 
 
-import Navbar from '../components/LandingPage/Navbar'
-import Footer from '../components/LandingPage/Footer'
+import Navbar from '../../components/LandingPage/Navbar'
+import Footer from '../../components/LandingPage/Footer'
 
 const Home = () => {
   return (

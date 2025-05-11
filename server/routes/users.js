@@ -1,7 +1,8 @@
-import express from 'express';
+import express, { request } from 'express';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import User from '../models/user.js';
+import Post from '../models/post.js';
 import upload from "../config/multer.js";
 
 
@@ -27,7 +28,7 @@ router.post('/login', (req, res, next) => {
 
   passport.authenticate('local', (err, user, info) => {
     if (err) return next(err);
-    if (!user) return res.status(401).json({ message: info.message || 'Invalid email or password' });
+    if (!user) return res.status(401).json({ message: info?.message || 'Invalid email or password' });
 
     req.logIn(user, (err) => {
       if (err) return next(err);
@@ -45,9 +46,11 @@ router.get('/logout', (req, res, next) => {
   });
 });
 
+
+// Profile Routes
 // Get user profile
 router.get('/profile', async (req, res) => {
-  const user = await User.findOne({ username: req.session.passport.user }).select('-password');
+  const user = await User.findOne({ username: req?.session?.passport?.user }).select('-password');
 
   if (!req.session?.passport?.user) {
     return res.status(401).json({ message: 'Unauthorized' });
@@ -63,8 +66,8 @@ router.put('/profile/edit', upload.single('file'), async (req, res) => {
     }
     
     const user = await User.findOneAndUpdate(
-      { username: req.session.passport.user }, 
-      req.body, 
+      { username: req?.session?.passport?.user }, 
+      req?.body, 
       { new: true }
     );
     
@@ -72,8 +75,8 @@ router.put('/profile/edit', upload.single('file'), async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    if (req.file) {
-      user.avatar = req.file.path;
+    if (req?.file) {
+      user.avatar = req?.file?.path;
       await user.save();
     }
     
@@ -84,6 +87,65 @@ router.put('/profile/edit', upload.single('file'), async (req, res) => {
   }
 });
 
+// Get all posts for signed user
+router.get('/posts', async (req, res) => {
+  const user = await User.findOne({ username: req?.session?.passport?.user });
+  const posts = await Post.find({ user: user?._id }).populate('user');
+  res.status(200).json(posts);
+});
 
+// Update a post
+router.put("/posts/:postId", async (req, res) => {
+  try {
+    if (!req?.session?.passport?.user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const { postId } = req?.params;
+    const { content } = req?.body;
+    console.log("content->>", content)
+    
+    const updatedPost = await Post.findOneAndUpdate(
+      { _id: postId },
+      { content },
+      { new: true }
+    ).populate('user');
+
+    if (!updatedPost) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    console.log("updatedPost --> ", updatedPost);
+    res.status(200).json(updatedPost);
+  } catch (error) {
+    console.error('Post update error:', error);
+    res.status(500).json({ message: error.message || 'Error updating post' });
+  }
+});
+
+// Delete a post
+router.delete("/posts/:postId", async (req, res) => {
+  try {
+    if (!req?.session?.passport?.user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const user = await User.find({username : req?.session?.passport?.user })
+    const { postId } = req?.params;
+    const deletedPost = await Post.findByIdAndDelete(postId);
+
+    user[0].posts.pull(postId);
+    user[0].postsCount = user[0].posts.length;
+    await user[0].save();
+
+    if (!deletedPost) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error('Post deletion error:', error);
+    res.status(500).json({ message: error.message || 'Error deleting post' });
+  }
+});
 
 export default router;

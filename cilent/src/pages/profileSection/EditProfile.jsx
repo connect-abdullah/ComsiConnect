@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect} from 'react'
 import { useLocation } from 'react-router-dom';
 import { FaCamera, FaArrowLeft, FaTimes } from 'react-icons/fa'
-import Navbar from '../components/Navbar';
-import { updateUser } from '../api/api';
+import Navbar from '../../components/Navbar';
+import { updateUser } from '../../api/api';
 
 
 const EditProfile = () => {
@@ -92,7 +92,7 @@ const EditProfile = () => {
       }
   
       const response = await updateUser(data); 
-      console.log('Profile updated:', response);
+      // console.log('Profile updated:', response);
   
       setSaveSuccess(true);
   
@@ -325,9 +325,6 @@ const EditProfile = () => {
           {saveSuccess && (
             <div className="mt-4 p-3 bg-green-600/20 border border-green-500 rounded-md text-green-200 text-center">
               Profile updated successfully!
-              {setTimeout(() => {
-                window.location.href = '/profile';
-              }, 1000)}
             </div>
           )}
         </form>

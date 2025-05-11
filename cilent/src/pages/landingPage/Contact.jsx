@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { FaEnvelope, FaUser, FaPhone, FaPaperPlane, FaMapMarkerAlt, FaClock } from 'react-icons/fa'
-import Navbar from '../components/LandingPage/Navbar'
-import Footer from '../components/LandingPage/Footer'
+import Navbar from '../../components/LandingPage/Navbar'
+import Footer from '../../components/LandingPage/Footer'
 
 const Contact = () => {
   const [formData, setFormData] = useState({

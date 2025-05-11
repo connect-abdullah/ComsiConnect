@@ -1,55 +1,69 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Link, useNavigate } from 'react-router-dom'
-import { FaEnvelope, FaLock, FaUser, FaIdCard, FaEye, FaEyeSlash } from 'react-icons/fa'
-import axios from 'axios'
-import { signupUser } from '../api/api';
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'
+import { loginUser } from '../../api/api'
 
-
-const Signup = () => {
+const Login = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    fullName: '',
-    username: '',
-    email: '',
-    password: ''
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(null)
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
-  }
-
+  const location = useLocation();
+  
+  // State variables
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  
+  // Check for success message from redirect (like after signup)
+  useEffect(() => {
+    if (location.state?.successMessage) {
+      setSuccessMessage(location.state.successMessage);
+      
+      // Clear the success message from location state
+      window.history.replaceState({}, document.title);
+      
+      // Auto-hide the success message after 5 seconds
+      const timer = setTimeout(() => {
+        setSuccessMessage('');
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);  
+    setError(null);
     
     try {
-      // Use the API service function
-      const data = await signupUser(formData);
+        const credentials = { username: username.toUpperCase(), password };
+      // Make login request to your API
+      const response = await loginUser(credentials);
       
-      // Store token
-      if (data?.token) {
-        localStorage.setItem('authToken', data?.token);
+      console.log('Login successful:', response);
+      
+      // Store the token
+      if (response?.data?.token) {
+        localStorage.setItem('authToken', response.token);
       }
       
-      // Redirect to login
-      navigate('/login', { 
-        state: { successMessage: 'Account created successfully! Please log in.' } 
-      });
+      // Store user information if needed
+      if (response?.data?.user) {
+        localStorage.setItem('user', JSON.stringify(response?.user));
+      }
+      
+      // Redirect to feed or dashboard
+      navigate('/profile');
       
     } catch (err) {
-      console.error('Signup error:', err);
+      console.error('Login error:', err);
       
       // Handle error responses
       if (err.response) {
-        setError(err.response.data.message || 'Failed to create account');
+        setError(err.response.data.message || 'Invalid username or password');
       } else if (err.request) {
         setError('No response from server. Please try again later.');
       } else {
@@ -59,7 +73,6 @@ const Signup = () => {
       setIsLoading(false);
     }
   };
-  
 
   return (
     <div className="bg-zinc-900 text-white min-h-screen flex flex-col">
@@ -79,7 +92,7 @@ const Signup = () => {
         </Link>
       </nav>
 
-      {/* Signup Form Section */}
+      {/* Login Form Section */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -90,76 +103,43 @@ const Signup = () => {
           <div className="bg-zinc-800 rounded-xl border border-zinc-700 shadow-xl overflow-hidden">
             {/* Form Header */}
             <div className="bg-gradient-to-r from-indigo-700 to-indigo-600 px-6 py-8 text-center">
-              <h2 className="text-2xl font-bold mb-2">Join COMSATS Connect</h2>
-              <p className="text-indigo-200">Create your account to get started</p>
+              <h2 className="text-2xl font-bold mb-2">Welcome Back</h2>
+              <p className="text-indigo-200">Sign in to your COMSATS Connect account</p>
             </div>
 
             {/* Form Body */}
             <div className="p-6">
-              {/* Error Message Display */}
+              {/* Success Message */}
+              {successMessage && (
+                <div className="mb-6 p-3 bg-green-600/20 border border-green-500 rounded-md text-green-200 text-center">
+                  {successMessage}
+                </div>
+              )}
+              
+              {/* Error Message */}
               {error && (
                 <div className="mb-6 p-3 bg-red-500/20 border border-red-500 rounded-md text-red-200 text-center">
                   {error}
                 </div>
               )}
               
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Full Name Field */}
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Username Field */}
                 <div className="space-y-2">
-                  <label htmlFor="fullName" className="block text-sm font-medium text-zinc-300">Full Name</label>
+                  <label htmlFor="username" className="block text-sm font-medium text-zinc-300">Username</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaUser className="text-zinc-500" />
-                    </div>
-                    <input
-                      id="fullName"
-                      name="fullName"
-                      type="text"
-                      required
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      className="block w-full pl-10 pr-3 py-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white"
-                      placeholder="John Doe"
-                    />
-                  </div>
-                </div>
-
-                {/* Roll Number Field */}
-                <div className="space-y-2">
-                  <label htmlFor="username" className="block text-sm font-medium text-zinc-300">Roll Number (Username)</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaIdCard className="text-zinc-500" />
+                      <FaEnvelope className="text-zinc-500" />
                     </div>
                     <input
                       id="username"
                       name="username"
                       type="text"
                       required
-                      value={formData.username}
-                      onChange={handleChange}
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       className="block w-full pl-10 pr-3 py-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white"
-                      placeholder="FA20-BCS-123"
-                    />
-                  </div>
-                </div>
-
-                {/* Email Field */}
-                <div className="space-y-2">
-                  <label htmlFor="email" className="block text-sm font-medium text-zinc-300">Email Address</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaEnvelope className="text-zinc-500" />
-                    </div>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      value={formData.email}
-                      onChange={handleChange}
-                      className="block w-full pl-10 pr-3 py-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white"
-                      placeholder="you@example.com"
+                      placeholder="Enter your username"
                     />
                   </div>
                 </div>
@@ -176,8 +156,8 @@ const Signup = () => {
                       name="password"
                       type={showPassword ? "text" : "password"}
                       required
-                      value={formData.password}
-                      onChange={handleChange}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       className="block w-full pl-10 pr-3 py-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white"
                       placeholder="••••••••"
                     />
@@ -193,22 +173,11 @@ const Signup = () => {
                   </div>
                 </div>
 
-                {/* Terms and Conditions Checkbox */}
-                <div className="flex items-start">
-                  <div className="flex items-center h-5">
-                    <input
-                      id="terms"
-                      name="terms"
-                      type="checkbox"
-                      required
-                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-zinc-600 rounded bg-zinc-700"
-                    />
-                  </div>
-                  <div className="ml-3 text-sm">
-                    <label htmlFor="terms" className="text-zinc-400">
-                      I agree to the <a href="#" className="text-indigo-400 hover:text-indigo-300">Terms of Service</a> and <a href="#" className="text-indigo-400 hover:text-indigo-300">Privacy Policy</a>
-                    </label>
-                  </div>
+                {/* Forgot Password Link */}
+                <div className="flex items-center justify-end">
+                  <Link to="/forgot-password" className="text-sm text-indigo-400 hover:text-indigo-300">
+                    Forgot your password?
+                  </Link>
                 </div>
 
                 {/* Submit Button with Loading State */}
@@ -226,10 +195,10 @@ const Signup = () => {
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Creating Account...
+                        Signing In...
                       </>
                     ) : (
-                      'Create Account'
+                      'Sign In'
                     )}
                   </button>
                 </div>
@@ -238,14 +207,14 @@ const Signup = () => {
               {/* Divider */}
               <div className="mt-6 flex items-center">
                 <div className="flex-grow border-t border-zinc-600"></div>
-                <span className="flex-shrink px-3 text-zinc-400 text-sm">Already have an account?</span>
+                <span className="flex-shrink px-3 text-zinc-400 text-sm">Don't have an account?</span>
                 <div className="flex-grow border-t border-zinc-600"></div>
               </div>
 
-              {/* Login Link */}
+              {/* Sign Up Link */}
               <div className="mt-6 text-center">
-                <Link to="/login" className="text-indigo-400 hover:text-indigo-300 font-medium">
-                  Sign in instead
+                <Link to="/signup" className="text-indigo-400 hover:text-indigo-300 font-medium">
+                  Create an account
                 </Link>
               </div>
             </div>
@@ -261,4 +230,4 @@ const Signup = () => {
   )
 }
 
-export default Signup
+export default Login

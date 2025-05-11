@@ -4,7 +4,7 @@ import passportLocalMongoose from 'passport-local-mongoose';
 const userSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
     username: { type: String, required: true, unique: true },
-    avatar: { type: String, default: 'FA' },
+    avatar: { type: String, default: 'https://dummyimage.com/300x300/000/fff.png&text=Put+Dp+Here' },
     bio: { type: String, default: '' },
     email: { type: String, required: true, unique: true },
     department: { type: String },

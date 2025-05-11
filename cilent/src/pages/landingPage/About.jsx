@@ -2,8 +2,8 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { FaGraduationCap, FaUsers, FaLaptopCode, FaBriefcase, FaHandshake, FaUniversity } from 'react-icons/fa'
-import Navbar from '../components/LandingPage/Navbar'
-import Footer from '../components/LandingPage/Footer'
+import Navbar from '../../components/LandingPage/Navbar'
+import Footer from '../../components/LandingPage/Footer'
 
 const About = () => {
   // Animation variants for staggered animations
