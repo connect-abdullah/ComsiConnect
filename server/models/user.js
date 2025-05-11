@@ -15,6 +15,11 @@ const userSchema = new mongoose.Schema({
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     savedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
+    repostedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
+    likedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
+    posts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
+    anonymousID: { type: String, unique: true },
+    confessionPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Confession' }]
   },
   { timestamps: true }
 );

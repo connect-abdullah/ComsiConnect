@@ -1,11 +1,12 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useLocation, Link } from 'react-router-dom'
+import { getUser } from '../api/api'
 
 const Navbar = () => {
   const location = useLocation();
   const currentPath = location.pathname;
-  
+  const [user, setUser] = useState();
   // Determine if a path is active
   const isActive = (path) => {
     if (path === '/') {
@@ -14,6 +15,14 @@ const Navbar = () => {
     // Check if currentPath starts with the given path (handles nested routes)
     return currentPath.startsWith(path);
   };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const user = await getUser();
+      setUser(user);
+    }
+    fetchUser();
+  }, []);
 
   return (
     <div>
@@ -42,12 +51,12 @@ const Navbar = () => {
             Feed
           </Link>
           <Link 
-            to="/explore" 
-            className={`transition duration-200 ${isActive('/explore') 
+            to="/confessions" 
+            className={`transition duration-200 ${isActive('/confessions') 
               ? 'text-white border-b-2 border-indigo-500 pb-1' 
               : 'text-zinc-300 hover:text-white'}`}
           >
-            Explore
+            Confessions
           </Link>
           <Link 
             to="/profile" 
@@ -73,7 +82,7 @@ const Navbar = () => {
           <div className="relative group">
             <Link to="/profile" className="block">
               <div className="w-9 h-9 bg-indigo-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-indigo-700 transition duration-200">
-                <span className="font-medium text-sm">CU</span>
+                <img src={user?.avatar} alt={user?.fullName} className="w-full h-full object-cover rounded-full" />
               </div>
             </Link>
             

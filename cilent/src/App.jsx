@@ -7,6 +7,7 @@ import Contact from "./pages/Contact";
 import Feed from "./pages/Feed";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
+import Confessions from "./pages/Confessions";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
       <Route path="/feed" element={<Feed />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/edit-profile" element={<EditProfile />} />
+      <Route path="/confessions" element={<Confessions />} />
     </Routes>
   );
 }

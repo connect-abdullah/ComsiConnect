@@ -27,9 +27,9 @@ app.use(
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-import indexRouter from "./routes/index.js";
+import feedRouter from "./routes/feed.js";
 import usersRouter from "./routes/users.js";
-
+import confessionsRouter from "./routes/confessions.js";
 import passport from "passport";
 import passportConfig from "./config/passport.js";
 passportConfig();
@@ -73,9 +73,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/", indexRouter);
+app.use("/feed", feedRouter);
 app.use("/users", usersRouter);
-
+app.use("/confessions", confessionsRouter);
 app.use((req, res, next) => {
   res.locals.currentUser = req.user;
   res.locals.success = req.flash("success");

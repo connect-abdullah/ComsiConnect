@@ -1,86 +1,44 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FaHeart, FaRetweet, FaBookmark, FaImage, FaTimes, FaRegHeart, FaRegBookmark } from 'react-icons/fa'
+import { FaHeart, FaRetweet, FaBookmark, FaImage, FaTimes, FaRegHeart, FaRegBookmark, FaDownload } from 'react-icons/fa'
 import Navbar from '../components/Navbar'
-
-// Mock data for feed posts
-const initialPosts = [
-  {
-    id: 1,
-    author: {
-      name: "Ali Ahmed",
-      username: "ali_ahmed",
-      avatar: "AA"
-    },
-    content: "Just submitted my final year project at COMSATS today! The presentation went really well. #FYP #ComputerScience",
-    timestamp: "2 hours ago",
-    images: [],
-    likes: 24,
-    reposts: 5,
-    isLiked: false,
-    isSaved: false
-  },
-  {
-    id: 2,
-    author: {
-      name: "Sana Khan",
-      username: "sana_khan",
-      avatar: "SK"
-    },
-    content: "Check out the photos from yesterday's CS department event! Great to see so many talented students showcasing their work.",
-    timestamp: "5 hours ago",
-    images: ["https://images.unsplash.com/photo-1515378960530-7c0da6231fb1?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGNvbXB1dGVyfGVufDB8fDB8fHww"],
-    likes: 42,
-    reposts: 8,
-    isLiked: false,
-    isSaved: false
-  },
-  {
-    id: 3,
-    author: {
-      name: "Dr. Farooq Ahmed",
-      username: "prof_farooq",
-      avatar: "FA"
-    },
-    content: "Reminder: Project proposals for the spring semester are due next Friday. Make sure to submit them on time through the portal.",
-    timestamp: "8 hours ago",
-    images: [],
-    likes: 15,
-    reposts: 12,
-    isLiked: false,
-    isSaved: false
-  },
-  {
-    id: 4,
-    author: {
-      name: "Maham Tariq",
-      username: "maham_t",
-      avatar: "MT"
-    },
-    content: "",
-    timestamp: "1 day ago",
-    images: [
-      "https://images.unsplash.com/photo-1503551723145-6c040742065b?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fHVuaXZlcnNpdHl8ZW58MHx8MHx8fDA%3D",
-      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHVuaXZlcnNpdHl8ZW58MHx8MHx8fDA%3D"
-    ],
-    likes: 78,
-    reposts: 10,
-    isLiked: false,
-    isSaved: false
-  }
-];
+import { post, interaction, getPosts, getUser } from '../api/api'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
 
 const Feed = () => {
-  const [posts, setPosts] = useState(initialPosts);
+  const [posts, setPosts] = useState();
   const [newPostContent, setNewPostContent] = useState('');
   const [selectedImages, setSelectedImages] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
+  const [loading, setLoading] = useState(true);
   const fileInputRef = useRef(null);
-
+  const [user, setUser] = useState();
+  const [isPosting, setIsPosting] = useState(false);
+  const [modalImage, setModalImage] = useState(null);
+  // Fetch all posts
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const response = await getPosts();
+    //   console.log("response from feed jsx (fetch posts) --> ",response);
+      setPosts(response);
+      setLoading(false);
+    };
+    fetchPosts();
+  }, []);
   // Handle text input change
   const handleContentChange = (e) => {
     setNewPostContent(e.target.value);
   };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await getUser();
+      setUser(response);
+    }
+    fetchUser();
+  }, []);
 
   // Handle image selection
   const handleImageSelect = (e) => {
@@ -111,71 +69,59 @@ const Feed = () => {
   };
 
   // Handle post submission
-  const handleSubmitPost = () => {
-    if (newPostContent.trim() === '' && previewImages.length === 0) return;
-    
-    const newPost = {
-      id: Date.now(),
-      author: {
-        name: "Current User",
-        username: "current_user",
-        avatar: "CU"
-      },
-      content: newPostContent,
-      timestamp: "Just now",
-      images: previewImages,
-      likes: 0,
-      reposts: 0,
-      isLiked: false,
-      isSaved: false
-    };
-    
-    setPosts([newPost, ...posts]);
-    setNewPostContent('');
-    setSelectedImages([]);
-    setPreviewImages([]);
+  const handleSubmitPost = async () => {
+    if (newPostContent.trim() === '' && selectedImages.length === 0) return;
+
+    setIsPosting(true);
+
+    // Prepare FormData if you want to upload images to the server
+    const formData = new FormData();
+    formData.append('content', newPostContent);
+    selectedImages.forEach((file) => {
+      formData.append('images', file); 
+    });
+
+    try {
+      const response = await post(formData);
+      setPosts([response, ...posts]);
+      setNewPostContent('');
+      setSelectedImages([]);
+      setPreviewImages([]);
+    } catch (error) {
+      console.error('Failed to create post:', error);
+    } finally {
+      setIsPosting(false);
+    }
   };
 
-  // Handle like toggle with animation
-  const handleLike = (postId) => {
-    setPosts(posts.map(post => {
-      if (post.id === postId) {
-        return {
-          ...post,
-          isLiked: !post.isLiked,
-          likes: post.isLiked ? post.likes - 1 : post.likes + 1
-        };
-      }
-      return post;
-    }));
+  // Handle post interactions (like, save, repost)
+  const handlePostInteraction = async (postId, interactionType) => {
+    try {
+      const response = await interaction(postId, interactionType); 
+    //   console.log("response from feed jsx (post interaction) --> ",response);
+  
+      setPosts(prevPosts =>
+        prevPosts.map(post => (post._id === postId ? response : post))
+      );
+    } catch (error) {
+      console.error(`Failed to ${interactionType} post:`, error);
+    }
   };
 
-  // Handle save toggle
-  const handleSave = (postId) => {
-    setPosts(posts.map(post => {
-      if (post.id === postId) {
-        return {
-          ...post,
-          isSaved: !post.isSaved
-        };
-      }
-      return post;
-    }));
+  const handleDownload = (url) => {
+    window.open(url, '_blank');
   };
 
-  // Handle repost
-  const handleRepost = (postId) => {
-    setPosts(posts.map(post => {
-      if (post.id === postId) {
-        return {
-          ...post,
-          isReposted: !post.isReposted,
-          reposts: post.isReposted ? post.reposts - 1 : post.reposts + 1
-        };
-      }
-      return post;
-    }));
-  };
+  if (loading) {
+    return (
+      <div className="bg-zinc-900 text-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+          <p>Loading feed...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-zinc-900 text-white min-h-screen">
@@ -187,7 +133,7 @@ const Feed = () => {
         <div className="bg-zinc-800 rounded-xl border border-zinc-700 p-4 mb-8">
           <div className="flex gap-3">
             <div className="w-10 h-10 bg-indigo-600 rounded-full flex-shrink-0 flex items-center justify-center">
-              <span className="font-medium text-sm">CU</span>
+              <img src={user?.avatar} alt={user?.fullName} className="w-full h-full object-cover rounded-full" />
             </div>
             <div className="flex-grow">
               <textarea
@@ -235,14 +181,23 @@ const Feed = () => {
                 </button>
                 <button 
                   onClick={handleSubmitPost}
-                  disabled={newPostContent.trim() === '' && previewImages.length === 0}
-                  className={`px-4 py-2 rounded-md font-medium transition ${
+                  disabled={newPostContent.trim() === '' && previewImages.length === 0 || isPosting}
+                  className={`px-4 py-2 rounded-md font-medium text-white transition ${
                     newPostContent.trim() === '' && previewImages.length === 0 
                       ? 'bg-indigo-600/50 cursor-not-allowed' 
-                      : 'bg-indigo-600 hover:bg-indigo-700'
+                      : isPosting
+                        ? 'bg-indigo-600/70 cursor-wait'
+                        : 'bg-indigo-600 hover:bg-indigo-700'
                   }`}
                 >
-                  Post
+                  {isPosting ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Posting...</span>
+                    </div>
+                  ) : (
+                    'Post'
+                  )}
                 </button>
               </div>
             </div>
@@ -251,42 +206,43 @@ const Feed = () => {
         
         {/* Feed Section */}
         <div className="space-y-6">
-          {posts.map(post => (
+          {posts && posts.map(post => (
             <motion.div 
-              key={post.id}
+              key={post._id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
               className="bg-zinc-800 rounded-xl border border-zinc-700 p-4"
             >
               {/* Post Header */}
-              <div className="flex gap-3 mb-3">
+              <div className="flex gap-3 mb-3" key={post._id}>
                 <div className="w-10 h-10 bg-indigo-600 rounded-full flex-shrink-0 flex items-center justify-center">
-                  <span className="font-medium text-sm">{post.author.avatar}</span>
+                  <img src={post?.user?.avatar} alt={post?.user?.fullName} className="w-full h-full object-cover rounded-full" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">{post.author.name}</span>
-                    <span className="text-zinc-400 text-sm">@{post.author.username}</span>
+                    <span className="font-medium">{post?.user?.fullName}</span>
+                    <span className="text-zinc-400 text-sm">@{post?.user?.username}</span>
                   </div>
-                  <span className="text-zinc-500 text-sm">{post.timestamp}</span>
+                  <span className="text-zinc-500 text-sm">{dayjs(post?.createdAt).fromNow()}</span>
                 </div>
               </div>
               
               {/* Post Content */}
-              {post.content && (
-                <p className="mb-4 text-zinc-200">{post.content}</p>
+              {post?.content && (
+                <p className="mb-4 text-zinc-200">{post?.content}</p>
               )}
               
               {/* Post Images */}
-              {post.images.length > 0 && (
-                <div className={`grid ${post.images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-2 mb-4`}>
-                  {post.images.map((image, index) => (
+              {post?.images?.length > 0 && (
+                <div className={`grid ${post?.images?.length > 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-2 mb-4`}>
+                  {post?.images?.map((image, index) => (
                     <img 
                       key={index}
                       src={image} 
-                      alt={`Post image ${index + 1}`} 
-                      className="rounded-lg w-full h-auto max-h-80 object-cover"
+                      alt={`Post image ${index + 1}`}
+                      onClick={() => setModalImage(image)}
+                      className="rounded-lg w-full h-auto max-h-80 object-cover cursor-pointer hover:opacity-90 transition-opacity"
                     />
                   ))}
                 </div>
@@ -294,64 +250,115 @@ const Feed = () => {
               
               {/* Post Actions */}
               <div className="flex justify-between items-center mt-2 pt-2 border-t border-zinc-700">
-                {/* Like Button */}
-                <div className="flex items-center">
-                  <motion.button 
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => handleLike(post.id)}
-                    className="flex items-center gap-1 text-zinc-400 hover:text-red-500 transition"
+                {/* Like */}
+                <motion.button 
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => handlePostInteraction(post?._id, 'like')}
+                  className="flex items-center gap-1 text-zinc-400 hover:text-red-500 transition"
+                >
+                  <motion.div
+                    initial={false}
+                    animate={{ 
+                      scale: post?.isLiked ? [1, 1.2, 1] : 1,
+                      rotate: post?.isLiked ? [0, 15, -15, 0] : 0
+                    }}
+                    transition={{ duration: 0.5 }}
                   >
-                    <AnimatePresence mode="wait">
-                      {post.isLiked ? (
-                        <motion.div
-                          key="heart-filled"
-                          initial={{ scale: 0.5, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          exit={{ scale: 0.5, opacity: 0 }}
-                          transition={{ type: "spring", stiffness: 300 }}
-                        >
-                          <FaHeart className="text-red-500" />
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key="heart-outline"
-                          initial={{ scale: 0.5, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          exit={{ scale: 0.5, opacity: 0 }}
-                        >
-                          <FaRegHeart />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                    <span className={post.isLiked ? "text-red-500" : ""}>{post.likes}</span>
-                  </motion.button>
-                </div>
-                
-                {/* Repost Button */}
-                <div className="flex items-center">
-                  <button 
-                    onClick={() => handleRepost(post.id)}
-                    className="flex items-center gap-1 text-zinc-400 hover:text-green-500 transition"
+                    {post?.isLiked ? (
+                      <FaHeart className="text-red-500" />
+                    ) : (
+                      <FaRegHeart />
+                    )}
+                  </motion.div>
+                  <motion.span
+                    animate={{ scale: post?.isLiked ? [1, 1.2, 1] : 1 }}
+                    className={post?.isLiked ? "text-red-500" : ""}
                   >
-                    <FaRetweet />
-                    <span>{post.reposts}</span>
-                  </button>
-                </div>
-                
-                {/* Save Button */}
-                <div className="flex items-center">
-                  <button 
-                    onClick={() => handleSave(post.id)}
-                    className={`flex items-center gap-1 ${post.isSaved ? 'text-indigo-400' : 'text-zinc-400 hover:text-indigo-400'} transition`}
+                    {post?.likedBy?.length}
+                  </motion.span>
+                </motion.button>
+
+                {/* Repost */}
+                <motion.button 
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => handlePostInteraction(post?._id, 'repost')}
+                  className="flex items-center gap-1 text-zinc-400 hover:text-green-500 transition"
+                >
+                  <motion.div
+                    animate={{ 
+                      rotate: post?.isReposted ? 360 : 0,
+                      scale: post?.isReposted ? [1, 1.2, 1] : 1
+                    }}
+                    transition={{ duration: 0.5 }}
                   >
-                    {post.isSaved ? <FaBookmark /> : <FaRegBookmark />}
-                  </button>
-                </div>
+                    <FaRetweet className={post?.isReposted ? "text-green-500" : ""} />
+                  </motion.div>
+                  <motion.span
+                    animate={{ scale: post?.isReposted ? [1, 1.2, 1] : 1 }}
+                    className={post?.isReposted ? "text-green-500" : ""}
+                  >
+                    {post?.repostedBy?.length}
+                  </motion.span>
+                </motion.button>
+
+                {/* Save */}
+                <motion.button 
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => handlePostInteraction(post?._id, 'save')}
+                  className={`text-${post?.isSaved ? 'indigo' : 'zinc'}-400 hover:text-indigo-400 transition`}
+                >
+                  <motion.div
+                    animate={{ 
+                      y: post?.isSaved ? [0, -5, 0] : 0,
+                      scale: post?.isSaved ? [1, 1.2, 1] : 1
+                    }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {post?.isSaved ? <FaBookmark /> : <FaRegBookmark />}
+                  </motion.div>
+                </motion.button>
               </div>
-            </motion.div>
+              </motion.div>
           ))}
         </div>
       </div>
+
+      {modalImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="relative bg-zinc-900/95 rounded-xl shadow-2xl p-6 max-w-4xl w-full flex flex-col items-center border border-zinc-800"
+          >
+            <button
+              className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors duration-200 bg-zinc-800 hover:bg-zinc-700 rounded-full p-2"
+              onClick={() => setModalImage(null)}
+              aria-label="Close"
+            >
+              <FaTimes className="w-5 h-5" />
+            </button>
+            <motion.img
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              src={modalImage}
+              alt="Full size"
+              className="max-h-[75vh] w-auto rounded-lg mb-6 shadow-xl"
+              style={{ objectFit: 'contain' }}
+            />
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleDownload(modalImage)}
+              className="flex items-center gap-3 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white font-semibold transition-colors duration-200 shadow-lg"
+            >
+              <FaDownload className="h-5 w-5" />
+              Download Image
+            </motion.button>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }

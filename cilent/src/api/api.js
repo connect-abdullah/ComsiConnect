@@ -38,7 +38,9 @@ export const signupUser = async (userData) => {
       throw error;
     }
   };
-  
+
+
+// User Routes
   export const getUser = async () => {
     try {
       const response = await api.get('/users/profile');
@@ -68,3 +70,90 @@ export const signupUser = async (userData) => {
     }
   };
   
+
+
+// Feed Routes
+// Feed Api
+export const post = async (postData) => {
+    try {
+        const response = await api.post('/feed/post', postData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          },
+          withCredentials: true
+        });
+        // console.log("response from api js --> ",response);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+// Get all posts api
+export const getPosts = async () => {
+    try {
+        const response = await api.get('/feed/posts');
+        // console.log("response from api js --> ",response);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+// Interaction api
+export const interaction = async (postId, interactionType) => {
+    try {
+        const response = await api.put(`/feed/post/${postId}`, { interactionType });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+
+// Confessions Routes
+// Get or create anonymous ID for the current user
+export const getAnonymousID = async () => {
+  try {
+    const response = await api.get('/confessions/anonymous-id');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Post a new confession
+export const postConfession = async (formData) => {
+  try {
+    const response = await api.post('/confessions/post', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
+      withCredentials: true
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get all confessions
+export const getConfessions = async () => {
+  try {
+    const response = await api.get('/confessions/all-posts');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Interact with a confession (like, repost, save)
+export const interactWithConfession = async (confessionId, interactionType) => {
+  try {
+    const response = await api.put(`/confessions/post/${confessionId}`, { interactionType });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
