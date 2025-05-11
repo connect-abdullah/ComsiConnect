@@ -10,30 +10,42 @@ const api = axios.create({
     }
   });
 
-
 // User authentication API calls
 export const signupUser = async (userData) => {
     try {
-      const response = await api.post('/users/signup', userData);
-      return response.data;
+      const response = await api.post('/auth/signup', userData);
+      if (response.status === 401) {
+        window.location.href = '/login';
+        throw new Error('Unauthorized');
+      }
+      return response;
     } catch (error) {
+      if (error.response?.status === 401) {
+        throw new Error('Signup failed - Please try again');
+      }
       throw error;
     }
   };
   
   export const loginUser = async (credentials) => {
     try {
-      const response = await api.post('/users/login', credentials);
+      const response = await api.post('/auth/login', credentials);
       return response.data;
     } catch (error) {
+      if (error.response?.status === 401) {
+        throw new Error('Invalid username or password');
+      }
       throw error;
     }
   };
 
   export const logoutUser = async () => {
     try {
-      const response = await api.get('/users/logout');
-      console.log("response from api js (logout) --> ",response);
+      const response = await api.get('/auth/logout');
+      if (response.status === 401) {
+        window.location.href = '/login';
+        throw new Error('Unauthorized');
+      }
       return response;
     } catch (error) {
       throw error;
@@ -45,6 +57,10 @@ export const signupUser = async (userData) => {
   export const getUser = async () => {
     try {
       const response = await api.get('/users/profile');
+      if (response.status === 401) {
+        window.location.href = '/login';
+        throw new Error('Unauthorized');
+      }
       return response.data;
     } catch (error) {
       throw error;
@@ -64,6 +80,10 @@ export const signupUser = async (userData) => {
         },
         withCredentials: true
       });
+      if (response.status === 401) {
+        window.location.href = '/login';
+        throw new Error('Unauthorized');
+      }
       return response.data;
     } catch (error) {
       console.error('Update error details:', error.response?.data || error.message);
@@ -75,7 +95,7 @@ export const signupUser = async (userData) => {
 
 // Feed Routes
 // Feed Api
-export const post = async (postData) => {
+export const post = async (postData) => { 
     try {
         const response = await api.post('/feed/post', postData, {
           headers: {
@@ -83,7 +103,10 @@ export const post = async (postData) => {
           },
           withCredentials: true
         });
-        // console.log("response from api js --> ",response);
+        if (response.status === 401) {
+          window.location.href = '/login';
+          throw new Error('Unauthorized');
+        }
         return response.data;
     } catch (error) {
         throw error;
@@ -94,7 +117,10 @@ export const post = async (postData) => {
 export const getPosts = async () => {
     try {
         const response = await api.get('/feed/posts');
-        // console.log("response from api js --> ",response);
+        if (response.status === 401) {
+          window.location.href = '/login';
+          throw new Error('Unauthorized');
+        }
         return response.data;
     } catch (error) {
         throw error;
@@ -105,6 +131,10 @@ export const getPosts = async () => {
 export const interaction = async (postId, interactionType) => {
     try {
         const response = await api.put(`/feed/post/${postId}`, { interactionType });
+        if (response.status === 401) {
+          window.location.href = '/login';
+          throw new Error('Unauthorized');
+        }
         return response.data;
     } catch (error) {
         throw error;
@@ -120,6 +150,10 @@ export const interaction = async (postId, interactionType) => {
 export const getUserPosts = async () => {
     try {
         const response = await api.get('/users/posts');
+        if (response.status === 401) {
+          window.location.href = '/login';
+          throw new Error('Unauthorized');
+        }
         return response.data;
     } catch (error) {
         throw error;
@@ -128,15 +162,30 @@ export const getUserPosts = async () => {
 
 // Update a post
 export const updatePost = async (postId, content) => {
-  const response = await api.put(`/users/posts/${postId}`, content);
-  return response.data;
+  try {
+    const response = await api.put(`/users/posts/${postId}`, content);
+    if (response.status === 401) {
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };
 
 // Delete a post
 export const deletePost = async (postId) => {
-  const response = await api.delete(`/users/posts/${postId}`);
-  // console.log("response from api js (delete post) --> ",response);
-  return response;
+  try {
+    const response = await api.delete(`/users/posts/${postId}`);
+    if (response.status === 401) {
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
+    return response;
+  } catch (error) {
+    throw error;
+  }
 };
 
 
@@ -149,6 +198,10 @@ export const deletePost = async (postId) => {
 export const getAnonymousID = async () => {
   try {
     const response = await api.get('/confessions/anonymous-id');
+    if (response.status === 401) {
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
     return response.data;
   } catch (error) {
     throw error;
@@ -164,6 +217,10 @@ export const postConfession = async (formData) => {
       },
       withCredentials: true
     });
+    if (response.status === 401) {
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
     return response.data;
   } catch (error) {
     throw error;
@@ -174,6 +231,10 @@ export const postConfession = async (formData) => {
 export const getConfessions = async () => {
   try {
     const response = await api.get('/confessions/all-posts');
+    if (response.status === 401) {
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
     return response.data;
   } catch (error) {
     throw error;
@@ -184,6 +245,10 @@ export const getConfessions = async () => {
 export const interactWithConfession = async (confessionId, interactionType) => {
   try {
     const response = await api.put(`/confessions/post/${confessionId}`, { interactionType });
+    if (response.status === 401) {
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
     return response.data;
   } catch (error) {
     throw error;
@@ -194,7 +259,10 @@ export const interactWithConfession = async (confessionId, interactionType) => {
 export const getMyConfessions = async () => {
   try {
     const response = await api.get('/confessions/my-posts');
-    // console.log("response from api js --> ",response);  
+    if (response.status === 401) {
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
     return response.data;
   } catch (error) {
     throw error;
@@ -205,9 +273,13 @@ export const getMyConfessions = async () => {
 export const updateConfession = async (postId,content) => {
   try {
     const response = await api.put(`/confessions/my-posts/${postId}`, content);
+    if (response.status === 401) {
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
     return response.data;
   } catch (error) {
-    throw error;
+    throw error;  
   }
 };
 
@@ -215,6 +287,10 @@ export const updateConfession = async (postId,content) => {
 export const deleteConfession = async (postId) => {
   try {
     const response = await api.delete(`/confessions/my-posts/${postId}`);
+    if (response.status === 401) {
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
     return response.data;
   } catch (error) {
     throw error;

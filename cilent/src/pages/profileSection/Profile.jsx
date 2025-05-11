@@ -67,7 +67,7 @@ const Profile = () => {
     try {
       let response = await logoutUser();
       if (response.status === 200) {
-        navigate("/");
+        navigate("/login");
       } else {
         console.error("Logout failed:", response);
       }

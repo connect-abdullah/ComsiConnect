@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useLocation, Link } from 'react-router-dom'
 import { getUser } from '../api/api'
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const location = useLocation();
   const currentPath = location.pathname;
+  const navigate = useNavigate();
+  
   const [user, setUser] = useState();
   // Determine if a path is active
   const isActive = (path) => {
@@ -24,11 +27,20 @@ const Navbar = () => {
     fetchUser();
   }, []);
 
+  const handleLogoClick = async () => {
+    const user = await getUser();
+    if (user) {
+      navigate('/feed');
+    } else {
+      navigate('/');
+    }
+  };
+
   return (
     <div>
       <nav className="sticky top-0 z-50 bg-zinc-800/80 backdrop-blur-sm px-6 py-4 flex justify-between items-center border-b border-zinc-700">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
+        <Link onClick={handleLogoClick} className="flex items-center gap-2">
           <motion.div
             initial={{ rotate: -10 }}
             animate={{ rotate: 10 }}

@@ -8,6 +8,7 @@ import expressSession from "express-session";
 import flash from "connect-flash";
 import mongoose from "mongoose";
 import MongoStore from 'connect-mongo';
+import isAuthenticated from './auth/auth.js';
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -30,6 +31,7 @@ const __dirname = path.dirname(__filename);
 import feedRouter from "./routes/feed.js";
 import usersRouter from "./routes/users.js";
 import confessionsRouter from "./routes/confessions.js";
+import authRouter from "./routes/auth.js";
 import passport from "passport";
 import passportConfig from "./config/passport.js";
 passportConfig();
@@ -76,9 +78,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/feed", feedRouter);
-app.use("/users", usersRouter);
-app.use("/confessions", confessionsRouter);
+app.use("/auth",authRouter);
+app.use("/feed", isAuthenticated,feedRouter);
+app.use("/users", isAuthenticated,usersRouter);
+app.use("/confessions", isAuthenticated,confessionsRouter);
 app.use((req, res, next) => {
   res.locals.currentUser = req.user;
   res.locals.success = req.flash("success");

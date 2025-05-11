@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import ProtectedRoute from './auth/ProtectedRoute';
 import Home from './pages/landingPage/Home';
 import Login from './pages/auth/Login';
 import Signup from "./pages/auth/Signup";
@@ -13,16 +14,19 @@ import MyConfessions from "./pages/MyConfessions";
 function App() {
   return (
     <Routes>
+       {/* Public Routes */}
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
-      <Route path="/feed" element={<Feed />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/edit-profile" element={<EditProfile />} />
-      <Route path="/confessions" element={<Confessions />} />
-      <Route path="/my-confessions" element={<MyConfessions />} />
+
+      {/* Protected Routes */}
+      <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+      <Route path="/confessions" element={<ProtectedRoute><Confessions /></ProtectedRoute>} />
+      <Route path="/my-confessions" element={<ProtectedRoute><MyConfessions /></ProtectedRoute>} />
     </Routes>
   );
 }
