@@ -14,10 +14,7 @@ const api = axios.create({
 export const signupUser = async (userData) => {
     try {
       const response = await api.post('/auth/signup', userData);
-      if (response.status === 401) {
-        window.location.href = '/login';
-        throw new Error('Unauthorized');
-      }
+
       return response;
     } catch (error) {
       if (error.response?.status === 401) {
@@ -52,7 +49,32 @@ export const signupUser = async (userData) => {
     }
   };
 
+  export const forgotPass = async (credentials) => {
+    try {
+      const response = await api.post('/auth/forgot', credentials);
+      // console.log("Response From forgot api -->", response)
 
+      return response;
+    } catch (error) {
+      if (error.response?.status === 401) {
+        throw new Error('OTP Delivery Failed - Please try again');
+      }
+      throw error;
+    }
+  };
+
+  export const verifyOTP = async (data) => {
+    try {
+      const response = await api.post('/auth/verify-otp',data);
+      // console.log("Response From verfiy api -->", response)
+      return response;
+    } catch (error) {
+      if (error.response?.status === 401) {
+        throw new Error('OTP Expired - Please try again');
+      }
+      throw error;
+    }
+  };
 // User Routes
   export const getUser = async () => {
     try {
@@ -91,7 +113,6 @@ export const signupUser = async (userData) => {
     }
   };
   
-
 
 // Feed Routes
 // Feed Api

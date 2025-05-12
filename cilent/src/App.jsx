@@ -10,6 +10,8 @@ import Profile from "./pages/profileSection/Profile";
 import EditProfile from "./pages/profileSection/EditProfile";
 import Confessions from "./pages/Confessions";
 import MyConfessions from "./pages/MyConfessions";
+import ForgotPass from "./pages/auth/ForgotPass";
+import VerifyOTP from "./pages/auth/VerifyOTP";
 
 function App() {
   return (
@@ -20,7 +22,9 @@ function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
-
+      <Route path="/forgot-pass" element={<ForgotPass />} />
+      <Route path="/verify-otp" element={<VerifyOTP />} />
+      
       {/* Protected Routes */}
       <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

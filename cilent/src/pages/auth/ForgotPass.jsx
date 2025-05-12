@@ -2,17 +2,14 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'
-import { loginUser } from '../../api/api'
+import { forgotPass } from '../../api/api'
 import Navbar from '../../components/LandingPage/Navbar'
 
-const Login = () => {
+const ForgotPass = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // State variables
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
@@ -40,31 +37,29 @@ const Login = () => {
     setError(null);
     
     try {
-        const credentials = { username: username.toUpperCase(), password };
-      // Make login request to your API
-      const response = await loginUser(credentials);
-      
-      console.log('Login successful:', response);
-      
-      // Store the token
-      if (response?.data?.token) {
-        localStorage.setItem('authToken', response.token);
-      }
-      
-      // Store user information if needed
-      if (response?.data?.user) {
-        localStorage.setItem('user', JSON.stringify(response?.user));
-      }
-      
+        const credentials = { email };
 
-      navigate('/profile');
+      const response = await forgotPass(credentials);
+      
+    //   console.log('--> Forgot Password successful:', response.data);
+      
+      if (response?.status == 200) {
+        navigate('/verify-otp', { 
+          state: {
+            ...response?.data,
+            successMessage: 'OTP sent to your email'
+          }
+        });
+      } else {
+        navigate('/forgot-pass')
+      }
       
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('Forgot Password error:', err);
       
       // Handle error responses
-      if (err) {
-        setError(err?.response?.data?.message || 'Invalid username or password');
+      if (err.response) {
+        setError(err.response.data.message || 'Invalid email');
       } else if (err.request) {
         setError('No response from server. Please try again later.');
       } else {
@@ -80,7 +75,7 @@ const Login = () => {
       {/* Navbar */}
       <Navbar />
 
-      {/* Login Form Section */}
+      {/* Forgot Password Form Section */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -91,8 +86,8 @@ const Login = () => {
           <div className="bg-zinc-800 rounded-xl border border-zinc-700 shadow-xl overflow-hidden">
             {/* Form Header */}
             <div className="bg-gradient-to-r from-indigo-700 to-indigo-600 px-6 py-8 text-center">
-              <h2 className="text-2xl font-bold mb-2">Welcome Back</h2>
-              <p className="text-indigo-200">Sign in to your COMSATS Connect account</p>
+              <h2 className="text-2xl font-bold mb-2">Forgot Password</h2>
+              <p className="text-indigo-200">Send OTP to your email</p>
             </div>
 
             {/* Form Body */}
@@ -112,62 +107,26 @@ const Login = () => {
               )}
               
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Username Field */}
+                {/* Email Field */}
                 <div className="space-y-2">
-                  <label htmlFor="username" className="block text-sm font-medium text-zinc-300">Username</label>
+                  <label htmlFor="email" className="block text-sm font-medium text-zinc-300">Email</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <FaEnvelope className="text-zinc-500" />
                     </div>
                     <input
-                      id="username"
-                      name="username"
+                      id="email"
+                      name="email"
                       type="text"
                       required
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value.toUpperCase())}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="block w-full pl-10 pr-3 py-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white"
-                      placeholder="Enter your username"
+                      placeholder="Enter your email"
                     />
                   </div>
                 </div>
-
-                {/* Password Field */}
-                <div className="space-y-2">
-                  <label htmlFor="password" className="block text-sm font-medium text-zinc-300">Password</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaLock className="text-zinc-500" />
-                    </div>
-                    <input
-                      id="password"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="block w-full pl-10 pr-3 py-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white"
-                      placeholder="••••••••"
-                    />
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                      <button
-                        type="button"
-                        className="text-zinc-500"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <FaEyeSlash /> : <FaEye />}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Forgot Password Link */}
-                <div className="flex items-center justify-end">
-                  <Link to="/forgot-pass" className="text-sm text-indigo-400 hover:text-indigo-300">
-                    Forgot your password?
-                  </Link>
-                </div>
-
+              
                 {/* Submit Button with Loading State */}
                 <div>
                   <button
@@ -183,29 +142,16 @@ const Login = () => {
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Signing In...
+                        Sending OTP...
                       </>
                     ) : (
-                      'Sign In'
+                      'Send OTP'
                     )}
                   </button>
-                  
                 </div>
               </form>
 
-              {/* Divider */}
-              <div className="mt-6 flex items-center">
-                <div className="flex-grow border-t border-zinc-600"></div>
-                <span className="flex-shrink px-3 text-zinc-400 text-sm">Don't have an account?</span>
-                <div className="flex-grow border-t border-zinc-600"></div>
-              </div>
 
-              {/* Sign Up Link */}
-              <div className="mt-6 text-center">
-                <Link to="/signup" className="text-indigo-400 hover:text-indigo-300 font-medium">
-                  Create an account
-                </Link>
-              </div>
             </div>
           </div>
 
@@ -219,4 +165,4 @@ const Login = () => {
   )
 }
 
-export default Login
+export default ForgotPass

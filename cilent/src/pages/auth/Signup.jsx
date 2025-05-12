@@ -135,8 +135,10 @@ const Signup = () => {
                       name="username"
                       type="text"
                       required
-                      value={formData.username}
+                      value={formData.username.toUpperCase()}
                       onChange={handleChange}
+                      pattern="^(FA|SP)(2[0-4])-(BSE|BCS|BAI|BDS|BBA|BCE|BIT|BSE|BSCS|BSIT|BME|BCE|BEE|BBA|BSAI|BPHY|BCY|BEN|BENV)-[0-9]{3}$"
+                      title="Format: FA24-BSE-042 (use FA or SP, valid year, valid dept code, and 3-digit roll)"
                       className="block w-full pl-10 pr-3 py-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white"
                       placeholder="FA20-BCS-123"
                     />
