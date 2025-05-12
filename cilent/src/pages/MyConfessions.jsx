@@ -177,7 +177,7 @@ const MyConfessions = () => {
 
                 {/* Confession Content */}
                 {confession.content && (
-                  <p className="mb-4 text-zinc-200">{confession.content}</p>
+                  <p className="mb-4 text-zinc-200 whitespace-pre-wrap break-words">{confession.content}</p>
                 )}
 
                 {/* Confession Images */}

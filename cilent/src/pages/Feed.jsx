@@ -117,8 +117,8 @@ const Feed = () => {
                 value={newPostContent}
                 onChange={handleContentChange}
                 placeholder="What's happening on campus?"
-                className="w-full bg-zinc-700 border border-zinc-600 rounded-lg p-3 min-h-[100px] resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
-              />
+                className="w-full bg-zinc-700 border border-zinc-600 rounded-lg p-3 min-h-[100px] resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white whitespace-pre-wrap break-words"
+              /> 
               
               {/* Preview selected images */}
               {previewImages.length > 0 && (
@@ -174,12 +174,12 @@ const Feed = () => {
                     <span className="font-medium">{post?.user?.fullName}</span>
                     <span className="text-zinc-400 text-sm">@{post?.user?.username}</span>
                   </div>
-                  <span className="text-zinc-500 text-sm">{dayjs(post?.createdAt).fromNow()}</span>
+                  <span className="text-zinc-500 text-sm ">{dayjs(post?.createdAt).fromNow()}</span>
                 </div>
               </div>
               
               {/* Post Content */}
-              {post?.content && <p className="mb-4 text-zinc-200">{post?.content}</p>}
+              {post?.content && <p className="mb-4 text-zinc-200 whitespace-pre-wrap break-words">{post?.content}</p>}
               
               {/* Post Images */}
               {post?.images?.length > 0 && (

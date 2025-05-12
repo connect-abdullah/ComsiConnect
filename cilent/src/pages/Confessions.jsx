@@ -19,15 +19,14 @@ const Confessions = () => {
   const [loading, setLoading] = useState(true)
   const [isPosting, setIsPosting] = useState(false)
 
-  // Fetch anonymous ID and confessions
+
   useEffect(() => {
     const initialize = async () => {
       try {
-        // Get or create anonymous ID for current user
+
         const anonymousData = await getAnonymousID()
         setAnonymousID(anonymousData.anonymousID)
         
-        // Fetch confessions
         const confessionsData = await getConfessions()
         setConfessions(confessionsData)
         console.log("confessionsData from confessions js --> ", confessionsData);
@@ -84,18 +83,15 @@ const Confessions = () => {
       const formData = new FormData()
       formData.append('content', newConfessionContent)
       
-      // Append each image file
       selectedImages.forEach((file) => {
         formData.append('images', file)
       })
       
-      // Add the anonymous ID
       formData.append('anonymousID', anonymousID)
       
-      // Submit confession
+
       const response = await postConfession(formData)
       
-      // Update UI with new confession
       setConfessions([response, ...confessions])
       
       // Clear the form
@@ -276,7 +272,7 @@ const Confessions = () => {
               
               {/* Confession Content */}
               {confession.content && (
-                <p className="mb-4 text-zinc-200">{confession.content}</p>
+                <p className="mb-4 text-zinc-200 whitespace-pre-wrap break-words">{confession.content}</p>
               )}
               
               {/* Confession Images */}

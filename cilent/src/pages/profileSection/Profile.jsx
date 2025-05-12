@@ -237,7 +237,7 @@ const Profile = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4 }}
-                  className="relative flex flex-col bg-zinc-800 rounded-xl border border-zinc-700 shadow-lg overflow-hidden h-[400px]"
+                  className="relative flex flex-col bg-zinc-800 rounded-xl border border-zinc-700 shadow-lg overflow-scroll h-[500px]"
                 >
                   {/* Edit/Delete Buttons */}
                   <div className="absolute top-3 right-3 flex gap-2 z-10">
@@ -288,7 +288,7 @@ const Profile = () => {
                   <div className="flex flex-col flex-1 p-4 overflow-hidden">
                     {post?.content && (
                       <div className="flex-1 overflow-y-auto">
-                        <p className="text-zinc-200">
+                        <p className="text-zinc-200 whitespace-pre-wrap break-words">
                           {post?.content}
                         </p>
                       </div>
