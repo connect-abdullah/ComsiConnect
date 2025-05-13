@@ -26,6 +26,7 @@ function App() {
       <Route path="/verify-otp" element={<VerifyOTP />} />
       
       {/* Protected Routes */}
+      
       <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
