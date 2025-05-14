@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema(
     repostedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
     likedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
     posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
-    anonymousID: { type: String, unique: true },
+    anonymousID: { type: String, unique: true , default: ""},
     confessionPosts: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Confession" },
     ],
@@ -33,9 +33,7 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: Date.now(),
     },
-    googleId: {
-      type: String,
-    },
+    rollNumber: { type: String, unique: true, default: "" },
   },
   { timestamps: true }
 );

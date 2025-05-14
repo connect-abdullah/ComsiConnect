@@ -91,7 +91,9 @@ router.put('/profile/edit', upload.single('file'), async (req, res) => {
 router.get('/posts', async (req, res) => {
   const user = await User.findOne({ username: req?.session?.passport?.user });
   const posts = await Post.find({ user: user?._id }).populate('user');
-  res.status(200).json(posts);
+  const savedPosts = await Post.find({ _id: { $in: user.savedPosts } }).populate('user');
+  // console.log("posts --> ", savedPosts)
+  res.status(200).json({posts, savedPosts});
 });
 
 // Update a post

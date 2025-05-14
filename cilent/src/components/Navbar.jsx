@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useLocation, Link } from 'react-router-dom'
-import { getUser } from '../api/api'
+import { getUser, logoutUser } from '../api/api'
 import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const location = useLocation();
   const currentPath = location.pathname;
   const navigate = useNavigate();
-  
+
   const [user, setUser] = useState();
   // Determine if a path is active
   const isActive = (path) => {
@@ -33,6 +33,17 @@ const Navbar = () => {
       navigate('/feed');
     } else {
       navigate('/');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser(); // Call logout API
+      localStorage.removeItem('token'); // Remove auth token
+      setUser(null); // Clear user state
+      navigate('/'); // Redirect to home page
+    } catch (error) {
+      console.error('Logout failed:', error);
     }
   };
 
@@ -107,7 +118,7 @@ const Navbar = () => {
                 {/* <Link to="/edit-profile" className="block px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-700">Edit Profile</Link> */}
                 {/* <Link to="/settings" className="block px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-700">Settings</Link> */}
                 <hr className="border-zinc-700 my-1" />
-                <button className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-zinc-700">
+                <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-zinc-700">
                   Sign Out
                 </button>
               </div>

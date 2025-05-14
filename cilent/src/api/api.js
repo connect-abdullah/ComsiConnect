@@ -75,6 +75,7 @@ export const signupUser = async (userData) => {
       throw error;
     }
   };
+
 // User Routes
   export const getUser = async () => {
     try {
@@ -162,6 +163,25 @@ export const interaction = async (postId, interactionType) => {
     }
 };
 
+// Follow User
+export const followUser = async (userId, action) => {
+  try {
+    // console.log(action)
+    const response = await api.post(`/feed/follow/${userId}`, action);
+    
+    // console.log("Response from followUser api -->" , response)
+    if (response.status === 401) {
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 
 
 
@@ -171,11 +191,12 @@ export const interaction = async (postId, interactionType) => {
 export const getUserPosts = async () => {
     try {
         const response = await api.get('/users/posts');
+        console.log("response --> ", response)
         if (response.status === 401) {
           window.location.href = '/login';
           throw new Error('Unauthorized');
         }
-        return response.data;
+        return response;
     } catch (error) {
         throw error;
     }
@@ -317,3 +338,7 @@ export const deleteConfession = async (postId) => {
     throw error;
   }
 };
+
+
+
+

@@ -15,12 +15,19 @@ passport.use(new LocalStrategy(User.authenticate()));
 router.post("/signup", async (req, res) => {
   const { fullName, password, email, username } = req.body;
   try {
-    const user = new User({ fullName, email, username });
+    const user = new User({ 
+      fullName, 
+      email, 
+      username,
+      rollNumber: username 
+    });
+    
+    console.log("User --> ", user);
     await User.register(user, password);
     res
-      .status(200)
-      .json({ message: "Account created successfully! Please log in." });
+      .status(200).json({ message: "Account created successfully! Please log in." });
   } catch (err) {
+    console.log("Error --> ", err)  
     res.status(500).send(err.message);
   }
 });

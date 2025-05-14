@@ -25,13 +25,12 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showSavedPosts, setShowSavedPosts] = useState(false);
-
+  const [savedPosts, setSavedPosts] = useState([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await getUser();
-        // console.log(response);
         setUserData(response);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -42,15 +41,18 @@ const Profile = () => {
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const response = await getUserPosts();
-      // console.log("response from profile jsx (fetch user posts) --> ",response);
-      setPosts(response);
+      try {
+        const response = await getUserPosts();
+        console.log("response from profile jsx (fetch user posts) --> ", response.data);
+        setPosts(response.data.posts);
+        setSavedPosts(response.data.savedPosts || []); // Store saved posts separately
+        console.log("savedPosts --> ", response.data.savedPosts);
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+      }
     };
     fetchPosts();
   }, []);
-
-  // View state for gallery (grid or list)
-  const [viewMode, setViewMode] = useState("grid");
 
   const handlePostInteraction = async (postId, interactionType) => {
     try {
@@ -58,6 +60,16 @@ const Profile = () => {
       setPosts(prevPosts =>
         prevPosts.map(post => (post._id === postId ? response : post))
       );
+      
+      // Update saved posts if the interaction was a save
+      if (interactionType === 'save') {
+        const updatedPost = response;
+        if (updatedPost.isSaved) {
+          setSavedPosts(prev => [...prev, updatedPost]);
+        } else {
+          setSavedPosts(prev => prev.filter(post => post._id !== postId));
+        }
+      }
     } catch (error) {
       console.error(`Failed to ${interactionType} post:`, error);
     }
@@ -104,11 +116,10 @@ const Profile = () => {
     try {
       const response = await deletePost(postId);
       let data = response.data.user[0];
-      // console.log("data from profile jsx (delete post) --> ", data);
       if(response.status === 200){
         setPosts(prev => prev.filter(p => p._id !== postId));
+        setSavedPosts(prev => prev.filter(p => p._id !== postId));
         setUserData(data);
-        // window.location.reload();
       } else {
         console.error('Failed to delete post:', response);
       }
@@ -118,6 +129,9 @@ const Profile = () => {
       setIsDeleting(false);
     }
   };
+
+  // Get the posts to display based on showSavedPosts toggle
+  const displayPosts = showSavedPosts ? savedPosts : posts;
 
   return (
     <div className="bg-zinc-900 text-white min-h-screen">
@@ -197,13 +211,13 @@ const Profile = () => {
         </div>
 
         {/* Post Gallery Controls */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3">
           <h2 className="text-2xl font-bold">
             {showSavedPosts ? "Saved Posts" : "Posts"}
           </h2>
           <button
             onClick={() => setShowSavedPosts(!showSavedPosts)}
-            className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${
+            className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors w-full sm:w-auto justify-center sm:justify-start ${
               showSavedPosts 
                 ? "bg-indigo-600 hover:bg-indigo-700" 
                 : "bg-zinc-700 hover:bg-zinc-600"
@@ -216,7 +230,7 @@ const Profile = () => {
 
         {/* Post Gallery Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {posts && posts.filter(post => !showSavedPosts || post.isSaved).length === 0 ? (
+          {displayPosts && displayPosts.length === 0 ? (
             <div className="col-span-2 text-center py-12 bg-zinc-800 rounded-xl border border-zinc-700">
               <FaBookmark className="mx-auto text-4xl text-zinc-600 mb-4" />
               <h3 className="text-xl font-semibold text-zinc-300 mb-2">
@@ -229,42 +243,42 @@ const Profile = () => {
               </p>
             </div>
           ) : (
-            posts && posts
-              .filter(post => !showSavedPosts || post.isSaved)
-              .map((post) => (
+            displayPosts && displayPosts.map((post) => (
                 <motion.div
                   key={post._id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4 }}
-                  className="relative flex flex-col bg-zinc-800 rounded-xl border border-zinc-700 shadow-lg overflow-scroll h-[500px]"
+                  className={`relative flex flex-col bg-zinc-800 rounded-xl border border-zinc-700 shadow-lg ${post?.images?.length > 0 ? 'max-h-[500px] md:max-h-[600px] lg:max-h-[500px]' : 'max-h-fit'}`}
                 >
-                  {/* Edit/Delete Buttons */}
-                  <div className="absolute top-3 right-3 flex gap-2 z-10">
-                    <button
-                      onClick={() => handleEditClick(post)}
-                      className="p-2 bg-indigo-600 hover:bg-indigo-700 rounded-full text-white shadow transition"
-                      title="Edit"
-                    >
-                      <FaEdit size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(post?._id)}
-                      className="px-2.5 bg-red-600 hover:bg-red-700 rounded-full text-white shadow transition"
-                      title="Delete"
-                      disabled={isDeleting}
-                    >
-                      {isDeleting ? (
-                        <span className="w-2 h-2 border-2 border-white border-t-transparent rounded-full animate-spin inline-block"></span>
-                      ) : (
-                        <span className="font-bold text-lg leading-none">&times;</span>
-                      )}
-                    </button>
-                  </div>
+                  {/* Edit/Delete Buttons - Only show on user's own posts */}
+                  {!showSavedPosts && (
+                    <div className="absolute top-3 right-3 flex gap-2 z-10">
+                      <button
+                        onClick={() => handleEditClick(post)}
+                        className="p-2 bg-indigo-600 hover:bg-indigo-700 rounded-full text-white shadow transition"
+                        title="Edit"
+                      >
+                        <FaEdit size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(post?._id)}
+                        className="px-2.5 bg-red-600 hover:bg-red-700 rounded-full text-white shadow transition"
+                        title="Delete"
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? (
+                          <span className="w-2 h-2 border-2 border-white border-t-transparent rounded-full animate-spin inline-block"></span>
+                        ) : (
+                          <span className="font-bold text-lg leading-none">&times;</span>
+                        )}
+                      </button>
+                    </div>
+                  )}
 
-                  {/* Post Images Container - Fixed Height */}
-                  <div className="h-[300px] overflow-hidden">
-                    {post?.images?.length > 0 ? (
+                  {/* Post Images Container - Only show if images exist */}
+                  {post?.images?.length > 0 ? (
+                    <div className="h-[200px] sm:h-[250px] md:h-[300px] overflow-hidden">
                       <div
                         className={`grid ${
                           post?.images?.length > 1 ? "grid-cols-2" : "grid-cols-1"
@@ -279,15 +293,18 @@ const Profile = () => {
                           />
                         ))}
                       </div>
-                    ) : (
-                      <div className="h-full bg-zinc-900" />
-                    )}
-                  </div>
+                    </div>
+                  ) : null}
 
-                  {/* Post Content - Scrollable if needed */}
-                  <div className="flex flex-col flex-1 p-4 overflow-hidden">
+                  {/* Post Content */}
+                  <div className={`flex flex-col flex-1 p-3 sm:p-4 ${post?.images?.length > 0 ? 'overflow-y-auto' : ''}`}>
+                    {showSavedPosts && (
+                      <div className="mb-2">
+                        <span className="text-indigo-400 font-semibold">@{post?.user?.username}</span>
+                      </div>
+                    )}
                     {post?.content && (
-                      <div className="flex-1 overflow-y-auto">
+                      <div className={post?.images?.length > 0 ? "flex-1 overflow-y-auto" : "pb-5"}>
                         <p className="text-zinc-200 whitespace-pre-wrap break-words">
                           {post?.content}
                         </p>
@@ -296,7 +313,7 @@ const Profile = () => {
 
                     <div className="flex justify-between items-center text-sm text-zinc-400 pt-3 mt-auto border-t border-zinc-700">
                       <span>{dayjs(post?.createdAt).fromNow()}</span>
-                      <div className="flex gap-4">
+                      <div className="flex gap-2 sm:gap-4">
                         {/* Like Button */}
                         <button
                           onClick={() => handlePostInteraction(post._id, 'like')}
@@ -317,7 +334,7 @@ const Profile = () => {
                           className="flex items-center gap-1 hover:text-green-500 transition"
                         >
                           <FaRetweet />
-                          <span>{post?.repostedBy?.length}</span>
+                          <span>{post?.repostedBy?.length }</span>
                         </button>
                         {/* Save Button */}
                         <button
@@ -340,8 +357,8 @@ const Profile = () => {
 
         {/* Edit Modal */}
         {editModal.open && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-            <div className="bg-zinc-800 rounded-xl p-6 w-full max-w-lg border border-zinc-700 shadow-lg relative">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+            <div className="bg-zinc-800 rounded-xl p-4 sm:p-6 w-full max-w-lg border border-zinc-700 shadow-lg relative">
               <button
                 className="absolute top-2 right-2 text-zinc-400 hover:text-white"
                 onClick={() => setEditModal({ open: false, post: null })}
@@ -375,7 +392,7 @@ const Profile = () => {
           </div>
         )}
       </div>
-    </div>
+  </div>
   );
 };
 
