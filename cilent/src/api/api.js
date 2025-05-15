@@ -76,6 +76,7 @@ export const signupUser = async (userData) => {
     }
   };
 
+
 // User Routes
   export const getUser = async () => {
     try {
@@ -113,7 +114,30 @@ export const signupUser = async (userData) => {
       throw error;
     }
   };
-  
+
+  export const viewProfile = async (id) => {
+    try {
+      const response = await api.get(`/users/view-profile/${id}`);
+      // console.log("response of view profile api --> ", response)
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  export const getList = async (id) => {
+    try {
+      const response = await api.get(`/users/profile/${id}`);
+      if (response.status === 401) {
+        window.location.href = '/login';
+        throw new Error('Unauthorized');
+      }
+      // console.log("response of get followers api --> ", response.data)
+      return response.data;
+    } catch (error) { 
+      throw error;
+    }
+  };
 
 // Feed Routes
 // Feed Api
@@ -191,7 +215,7 @@ export const followUser = async (userId, action) => {
 export const getUserPosts = async () => {
     try {
         const response = await api.get('/users/posts');
-        console.log("response --> ", response)
+        // console.log("response --> ", response)
         if (response.status === 401) {
           window.location.href = '/login';
           throw new Error('Unauthorized');

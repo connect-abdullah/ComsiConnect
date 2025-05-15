@@ -12,6 +12,8 @@ import Confessions from "./pages/Confessions";
 import MyConfessions from "./pages/MyConfessions";
 import ForgotPass from "./pages/auth/ForgotPass";
 import VerifyOTP from "./pages/auth/VerifyOTP";
+import ViewProfile from "./pages/profileSection/ViewProfile";
+import FollowList from './pages/profileSection/FollowList';
 
 function App() {
   return (
@@ -32,6 +34,8 @@ function App() {
       <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
       <Route path="/confessions" element={<ProtectedRoute><Confessions /></ProtectedRoute>} />
       <Route path="/my-confessions" element={<ProtectedRoute><MyConfessions /></ProtectedRoute>} />
+      <Route path="/view-profile/:id" element={<ProtectedRoute><ViewProfile /></ProtectedRoute>} />
+      <Route path="/profile/:userId/:type" element={<FollowList />} />
     </Routes>
   );
 }

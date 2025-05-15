@@ -43,10 +43,10 @@ const Profile = () => {
     const fetchPosts = async () => {
       try {
         const response = await getUserPosts();
-        console.log("response from profile jsx (fetch user posts) --> ", response.data);
+        // console.log("response from profile jsx (fetch user posts) --> ", response.data);
         setPosts(response.data.posts);
-        setSavedPosts(response.data.savedPosts || []); // Store saved posts separately
-        console.log("savedPosts --> ", response.data.savedPosts);
+        setSavedPosts(response.data.savedPosts || []); 
+        // console.log("savedPosts --> ", response.data.savedPosts);
       } catch (error) {
         console.error("Error fetching posts:", error);
       }
@@ -176,16 +176,16 @@ const Profile = () => {
                   <div className="text-zinc-400 text-sm">Posts</div>
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-xl">
+                  <div onClick={() => navigate(`/profile/${userData?._id}/followers`)} className="font-bold text-xl hover:cursor-pointer">
                     {userData?.followersCount}
                   </div>
-                  <div className="text-zinc-400 text-sm">Followers</div>
+                  <div onClick={() => navigate(`/profile/${userData?._id}/followers`)} className="text-zinc-400 text-sm hover:cursor-pointer hover:text-indigo-400">Followers</div>
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-xl">
+                  <div onClick={() => navigate(`/profile/${userData?._id}/following`)} className="font-bold text-xl hover:cursor-pointer">
                     {userData?.followingCount}
                   </div>
-                  <div className="text-zinc-400 text-sm">Following</div>
+                  <div onClick={() => navigate(`/profile/${userData?._id}/following`)} className="text-zinc-400 text-sm hover:cursor-pointer hover:text-indigo-400">Following</div>
                 </div>
               </div>
 
@@ -304,7 +304,7 @@ const Profile = () => {
                       </div>
                     )}
                     {post?.content && (
-                      <div className={post?.images?.length > 0 ? "flex-1 overflow-y-auto" : "pb-5"}>
+                      <div className={post?.images?.length > 0 ? "flex-1 overflow-y-auto pb-3" : "pb-3"}>
                         <p className="text-zinc-200 whitespace-pre-wrap break-words">
                           {post?.content}
                         </p>

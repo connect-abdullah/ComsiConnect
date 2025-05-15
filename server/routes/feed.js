@@ -76,14 +76,14 @@ router.put('/post/:postId', async (req, res) => {
   };
 
   const interaction = interactions[interactionType];
-  post[interaction.flag] = !post[interaction.flag];
+  post[interaction?.flag] = !post[interaction?.flag];
   
-  if (post[interaction.flag]) {
-    post[interaction.postArray].push(user?._id);
-    user[interaction.userArray].push(post?._id);
+  if (post[interaction?.flag]) {
+    post[interaction?.postArray].push(user?._id);
+    user[interaction?.userArray].push(post?._id);
   } else {
-    post[interaction.postArray].pull(user?._id);
-    user[interaction.userArray].pull(post?._id);
+    post[interaction?.postArray].pull(user?._id);
+    user[interaction?.userArray].pull(post?._id);
   }
 
   await Promise.all([post.save(), user.save()]);
@@ -100,6 +100,25 @@ router.get('/posts', async (req, res) => {
     let posts = await Post.find()
       .populate('user')
       .lean(); 
+
+    let followingPosts = await Post.find({
+      user: { $in: currentUser.following }
+    }).populate('user').lean();
+
+    // Add isFollowed flag to following posts
+    followingPosts = followingPosts.map(post => {
+      const isFollowed = post.user?.followers?.some(followerId =>
+        followerId.toString() === currentUser._id.toString()
+      );
+
+      return {
+        ...post,
+        user: {
+          ...post.user,
+          isFollowed
+        }
+      };
+    });
 
     // Add isFollowed to each post.user
     posts = posts.map(post => {
@@ -122,7 +141,7 @@ router.get('/posts', async (req, res) => {
       [posts[i], posts[j]] = [posts[j], posts[i]];
     }
 
-    res.status(200).json(posts);
+    res.status(200).json({posts, followingPosts});
   } catch (err) {
     console.error("Error in /posts:", err);
     res.status(500).json({ error: "Failed to fetch posts" });

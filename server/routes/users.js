@@ -150,4 +150,21 @@ router.delete("/posts/:postId", async (req, res) => {
   }
 });
 
+// Get other user profile 
+router.get('/view-profile/:id', async (req, res) => {
+  const { id } = req.params;
+  const user = await User.findOne({ _id: id }).select('-password');
+  const posts = await Post.find({ user: id }).populate('user');
+  res.status(200).json({user, posts});
+});
+
+// Get followers list
+router.get('/profile/:id', async (req, res) => {
+  const { id } = req.params;
+  const user = await User.findOne({ _id: id }).select('-password');
+  await user.populate(['followers', 'following']);
+  res.status(200).json({user});
+});
+
+
 export default router;

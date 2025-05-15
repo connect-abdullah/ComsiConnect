@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect  } from "react"
+import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import { FaHeart, FaRetweet, FaBookmark, FaImage, FaTimes, FaRegHeart, FaRegBookmark, FaDownload } from "react-icons/fa"
 import Navbar from "../components/Navbar"
@@ -20,11 +21,17 @@ const Feed = () => {
   const [isPosting, setIsPosting] = useState(false)
   const [modalImage, setModalImage] = useState(null)
   const [followedStatus, setFollowedStatus] = useState({})
+  const [followingPosts, setFollowingPosts] = useState([])
+  const [showFollowing, setShowFollowing] = useState(false)
+  const navigate = useNavigate()
 
   // Fetch all posts
   useEffect(() => {
     const fetchPosts = async () => {
-      setPosts(await getPosts())
+      const response = await getPosts()
+
+      setPosts(response?.posts)
+      setFollowingPosts(response?.followingPosts)
       setLoading(false)
     }
     fetchPosts()
@@ -138,6 +145,11 @@ const Feed = () => {
     }
   }
 
+  // User Profile Section
+  const handleViewProfile = async (id) => {
+    navigate(`/view-profile/${id}`)
+  }
+  
   useEffect(() => {
     if (posts && posts.length > 0) {
       const initialStatus = {}
@@ -161,12 +173,28 @@ const Feed = () => {
     )
   }
 
+  const displayPosts = showFollowing ? followingPosts : posts;
+
   return (
     <div className="bg-zinc-900 text-white min-h-screen">
       {/* Navbar */}
       <Navbar />
 
       <div className="max-w-3xl mx-auto px-4 py-6">
+        {/* Toggle Button */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => setShowFollowing(!showFollowing)}
+            className={`px-4 py-2 rounded-full transition-all ${
+              showFollowing 
+                ? "bg-indigo-600 text-white" 
+                : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+            }`}
+          >
+            {showFollowing ? "Following" : "All Posts"}
+          </button>
+        </div>
+
         {/* Post Creation Section */}
         <div className="bg-zinc-800 rounded-xl border border-zinc-700 p-4 mb-8">
           <div className="flex gap-3">
@@ -248,8 +276,8 @@ const Feed = () => {
 
         {/* Feed Section */}
         <div className="space-y-6">
-          {posts &&
-            posts.map((post) => (
+          {displayPosts &&
+            displayPosts.map((post) => (
               <motion.div
                 key={post._id}
                 initial={{ opacity: 0, y: 20 }}
@@ -261,15 +289,16 @@ const Feed = () => {
                 <div className="flex gap-2 sm:gap-3 mb-3">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 bg-indigo-600 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden">
                     <img
-                      src={post?.user?.avatar || "/placeholder.svg"}
+                      src={post?.user?.avatar ||"/placeholder.svg"}
                       alt={post?.user?.fullName}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover cursor-pointer"
+                      onClick={() => handleViewProfile(post?.user?._id)}
                     />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-center gap-2 mb-1 sm:mb-0">
-                        <span className="font-medium text-sm sm:text-base truncate">{post?.user?.fullName}</span>
+                        <span className="font-medium text-sm sm:text-base truncate cursor-pointer" onClick={() => handleViewProfile(post?.user?._id)}>{post?.user?.fullName}</span>
                         <span className="text-zinc-400 text-xs sm:text-sm">@{post?.user?.username}</span>
                       </div>
                       {post?.user?._id !== user?._id && (
