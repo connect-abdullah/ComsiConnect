@@ -9,7 +9,6 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // State variables
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -92,7 +91,7 @@ const Login = () => {
             {/* Form Header */}
             <div className="bg-gradient-to-r from-indigo-700 to-indigo-600 px-6 py-8 text-center">
               <h2 className="text-2xl font-bold mb-2">Welcome Back</h2>
-              <p className="text-indigo-200">Sign in to your COMSATS Connect account</p>
+              <p className="text-indigo-200">Sign in to your ComsiConnect Connect account</p>
             </div>
 
             {/* Form Body */}
@@ -211,7 +210,7 @@ const Login = () => {
 
           {/* Decorative Element */}
           <div className="mt-8 text-center text-zinc-500 text-sm">
-            <p>© 2025 COMSATS Connect. All rights reserved.</p>
+            <p>© 2025 ComsiConnect Connect. All rights reserved.</p>
           </div>
         </motion.div>
       </div>

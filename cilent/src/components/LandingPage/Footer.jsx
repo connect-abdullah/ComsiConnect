@@ -10,7 +10,7 @@ const Footer = () => {
               <div className="bg-indigo-600 w-6 h-6 rounded-md flex items-center justify-center">
                 <span className="font-bold text-sm">C</span>
               </div>
-              <span className="font-bold">COMSATS Connect</span>
+              <span className="font-bold">ComsiConnect Connect</span>
             </div>
             <p className="text-zinc-500 text-sm mt-1">© 2025 All rights reserved</p>
           </div>

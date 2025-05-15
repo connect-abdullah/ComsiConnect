@@ -73,16 +73,26 @@ router.get('/anonymous-id', async (req, res) => {
 
   // Get all confessions
   router.get('/all-posts', async (req, res) => {
-    const confessions = await Confession.find().populate('user');
-    // Shuffle the confessions array using Fisher-Yates algorithm
-    for (let i = confessions.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [confessions[i], confessions[j]] = [confessions[j], confessions[i]];
+    try {
+      const confessions = await Confession.find().populate('user').lean();
+  
+      const now = new Date().getTime();
+      const shuffledConfessions = confessions
+        .map(confession => {
+          const ageInMinutes = (now - new Date(confession.createdAt).getTime()) / (1000 * 60);
+          const score = Math.random() * Math.exp(-ageInMinutes / 60); // Decay factor: ~1hr
+          return { confession, score };
+        })
+        .sort((a, b) => b.score - a.score)
+        .map(item => item.confession);
+  
+      res.status(200).json(shuffledConfessions);
+    } catch (err) {
+      console.error("Error in /all-posts:", err);
+      res.status(500).json({ error: "Failed to fetch confessions" });
     }
-    // console.log("confessions from confessions js --> ", confessions);
-    res.status(200).json(confessions);
   });
-
+  
   // Interact with a confession (like, repost, save)
   router.put('/post/:confessionId', async (req, res) => {
     const { confessionId } = req?.params;

@@ -60,7 +60,7 @@ const Navbar = () => {
           >
             <span className="font-bold">C</span>
           </motion.div>
-          <span className="font-bold text-xl">COMSATS Connect</span>
+          <span className="font-bold text-xl">ComsiConnect</span>
         </Link>
         
         {/* Main Nav Links */}
@@ -89,6 +89,14 @@ const Navbar = () => {
           >
             Profile
           </Link>
+          <Link 
+            to="/chat" 
+            className={`transition duration-200 ${isActive('/chat') 
+              ? 'text-white border-b-2 border-indigo-500 pb-1' 
+              : 'text-zinc-300 hover:text-white'}`}
+          >
+            AI Buddy
+          </Link>
         </div>
         
         {/* Right Side Actions */}
@@ -103,11 +111,11 @@ const Navbar = () => {
           
           {/* User Avatar with Dropdown Menu */}
           <div className="relative group">
-            <Link to="/profile" className="block">
+            <div className="block">
               <div className="w-9 h-9 bg-indigo-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-indigo-700 transition duration-200">
                 <img src={user?.avatar} alt={user?.fullName} className="w-full h-full object-cover rounded-full" />
               </div>
-            </Link>
+            </div>
             
             {/* Dropdown Menu */}
             <div className="absolute right-0 mt-2 w-48 bg-zinc-800 rounded-md overflow-hidden shadow-lg border border-zinc-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right">
@@ -115,7 +123,7 @@ const Navbar = () => {
                 <Link to="/feed" className="block px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-700">Feed</Link>
                 <Link to="/confessions" className="block px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-700">Confessions</Link>
                 <Link to="/profile" className="block px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-700">Your Profile</Link>
-                {/* <Link to="/edit-profile" className="block px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-700">Edit Profile</Link> */}
+                <Link to="/chat" className="block px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-700">AI Buddy</Link>
                 {/* <Link to="/settings" className="block px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-700">Settings</Link> */}
                 <hr className="border-zinc-700 my-1" />
                 <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-zinc-700">

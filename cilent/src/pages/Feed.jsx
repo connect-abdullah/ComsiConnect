@@ -1,9 +1,7 @@
-"use client"
-
 import { useState, useRef, useEffect  } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
-import { FaHeart, FaRetweet, FaBookmark, FaImage, FaTimes, FaRegHeart, FaRegBookmark, FaDownload } from "react-icons/fa"
+import { FaHeart, FaRetweet, FaBookmark, FaImage, FaTimes, FaRegHeart, FaRegBookmark, FaDownload, FaSearch } from "react-icons/fa"
 import Navbar from "../components/Navbar"
 import { post, interaction, getPosts, getUser, followUser } from "../api/api"
 import dayjs from "dayjs"
@@ -23,6 +21,8 @@ const Feed = () => {
   const [followedStatus, setFollowedStatus] = useState({})
   const [followingPosts, setFollowingPosts] = useState([])
   const [showFollowing, setShowFollowing] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchResults, setSearchResults] = useState([])
   const navigate = useNavigate()
 
   // Fetch all posts
@@ -36,6 +36,27 @@ const Feed = () => {
     }
     fetchPosts()
   }, [])
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    const query = e.target.value
+    setSearchQuery(query)
+
+    if (query.trim()) {
+      const filteredUsers = posts?.reduce((acc, post) => {
+        const user = post?.user
+        if (!acc.some(u => u._id === user?._id) && 
+            (user?.fullName?.toLowerCase().includes(query.toLowerCase()) || 
+             user?.username?.toLowerCase().includes(query.toLowerCase()))) {
+          acc.push(user)
+        }
+        return acc
+      }, [])
+      setSearchResults(filteredUsers || [])
+    } else {
+      setSearchResults([])
+    }
+  }
 
   // Handle text input change
   const handleContentChange = (e) => {
@@ -181,11 +202,55 @@ const Feed = () => {
       <Navbar />
 
       <div className="max-w-3xl mx-auto px-4 py-6">
-        {/* Toggle Button */}
-        <div className="flex justify-end mb-4">
+        {/* Search and Toggle Section */}
+        <div className="flex justify-between items-center mb-4">
+          {/* Search Bar */}
+          <div className="relative flex-1 max-w-xs">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                placeholder="Search users..."
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400" />
+            </div>
+            
+            {/* Search Results Dropdown */}
+            {searchResults.length > 0 && searchQuery && (
+              <div className="absolute z-10 w-full mt-2 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg">
+                {searchResults.map((user) => (
+                  <div
+                    key={user?._id}
+                    onClick={() => {
+                      handleViewProfile(user?._id)
+                      setSearchQuery("")
+                      setSearchResults([])
+                    }}
+                    className="flex items-center gap-3 p-3 hover:bg-zinc-700 cursor-pointer transition"
+                  >
+                    <div className="w-8 h-8 bg-indigo-600 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden">
+                      <img
+                        src={user?.avatar || "/placeholder.svg"}
+                        alt={user?.fullName}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <div className="font-medium">{user?.fullName}</div>
+                      <div className="text-sm text-zinc-400">@{user?.username}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Toggle Button */}
           <button
             onClick={() => setShowFollowing(!showFollowing)}
-            className={`px-4 py-2 rounded-full transition-all ${
+            className={`px-4 py-2 rounded-full transition-all ml-4 ${
               showFollowing 
                 ? "bg-indigo-600 text-white" 
                 : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"

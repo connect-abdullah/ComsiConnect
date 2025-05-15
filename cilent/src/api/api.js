@@ -139,6 +139,9 @@ export const signupUser = async (userData) => {
     }
   };
 
+
+
+
 // Feed Routes
 // Feed Api
 export const post = async (postData) => { 
@@ -258,7 +261,6 @@ export const deletePost = async (postId) => {
 
 
 
-
 // Confessions Routes
 // Get or create anonymous ID for the current user
 export const getAnonymousID = async () => {
@@ -364,5 +366,17 @@ export const deleteConfession = async (postId) => {
 };
 
 
-
-
+// Chatbot Api
+export const chatbot = async (message) => {
+  try {
+    const response = await fetch(`${API_URL}/users/chat`, {
+      method: "POST", 
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ message })
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};

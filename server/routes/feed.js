@@ -135,11 +135,16 @@ router.get('/posts', async (req, res) => {
       };
     });
 
-    // Shuffle the posts using Fisher-Yates
-    for (let i = posts.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [posts[i], posts[j]] = [posts[j], posts[i]];
-    }
+      // Weighted shuffle: favor newer posts but allow randomness
+      const now = new Date().getTime();
+      posts = posts
+        .map(post => {
+          const ageInMinutes = (now - new Date(post.createdAt).getTime()) / (1000 * 60);
+          const score = Math.random() * Math.exp(-ageInMinutes / 60); // decays over ~1hr
+          return { post, score };
+        })
+        .sort((a, b) => b.score - a.score)
+        .map(p => p.post);
 
     res.status(200).json({posts, followingPosts});
   } catch (err) {

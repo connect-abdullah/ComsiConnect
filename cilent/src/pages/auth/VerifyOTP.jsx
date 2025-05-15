@@ -259,7 +259,7 @@ const VerifyOTP = () => {
 
           {/* Decorative Element */}
           <div className="mt-8 text-center text-zinc-500 text-sm">
-            <p>© 2025 COMSATS Connect. All rights reserved.</p>
+            <p>© 2025 ComsiConnect Connect. All rights reserved.</p>
           </div>
         </motion.div>
       </div>

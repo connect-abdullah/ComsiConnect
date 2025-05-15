@@ -21,7 +21,7 @@ const Home = () => {
             transition={{ duration: 0.6 }}
             className="text-4xl md:text-6xl font-bold leading-tight"
           >
-            Connect with the <span className="text-indigo-500">COMSATS</span> community
+            Connect with the community
           </motion.h1>
           
           <motion.p 
@@ -30,7 +30,7 @@ const Home = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-zinc-400 text-lg md:text-xl"
           >
-            The exclusive social platform designed for COMSATS students, faculty, and alumni. 
+            The exclusive social platform designed for students, faculty, and alumni. 
             Share ideas, collaborate on projects, and stay connected.
           </motion.p>
           
@@ -94,8 +94,8 @@ const Home = () => {
       {/* Features Section */}
       <section className="py-20 px-6 md:px-20 bg-zinc-800">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose COMSATS Connect?</h2>
-          <p className="text-zinc-400 max-w-2xl mx-auto">Discover all the ways our platform helps you stay connected with the COMSATS community.</p>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose ComsiConnect?</h2>
+          <p className="text-zinc-400 max-w-2xl mx-auto">Discover all the ways our platform helps you stay connected with the community.</p>
         </div>
         
         <div className="grid md:grid-cols-3 gap-8">
@@ -140,8 +140,8 @@ const Home = () => {
       {/* CTA Section */}
       <section className="py-20 px-6 md:px-20 text-center">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to join the COMSATS community?</h2>
-          <p className="text-zinc-400 text-lg mb-8">Sign up now and connect with thousands of COMSATS students and alumni.</p>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to join the ComsiConnect community?</h2>
+          <p className="text-zinc-400 text-lg mb-8">Sign up now and connect with thousands of students and alumni.</p>
           <a href="/signup" className="px-8 py-4 rounded-md bg-indigo-600 hover:bg-indigo-700 transition duration-300 font-medium text-lg">
             Create Your Account
           </a>

@@ -162,7 +162,7 @@ const Confessions = () => {
         {/* Page Header with Explanation */}
         <div className="bg-zinc-800/50 rounded-xl p-4 mb-6 border border-zinc-700">
           <div className="flex justify-between items-center">
-            <h1 className="text-xl font-bold">COMSATS Confessions</h1>
+            <h1 className="text-xl font-bold">ComsiConnect Confessions</h1>
             <Link 
               to="/my-confessions" 
               className="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white font-medium transition flex items-center gap-2"

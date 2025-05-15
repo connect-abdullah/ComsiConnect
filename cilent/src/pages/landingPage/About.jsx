@@ -42,7 +42,7 @@ const About = () => {
             transition={{ duration: 0.7 }}
             className="text-4xl md:text-6xl font-bold mb-6"
           >
-            About <span className="text-indigo-500">COMSATS Connect</span>
+            About <span className="text-indigo-500">ComsiConnect Connect</span>
           </motion.h1>
           
           <motion.p 
@@ -72,7 +72,7 @@ const About = () => {
               <div>
                 <h2 className="text-2xl font-bold mb-4">Our Mission</h2>
                 <p className="text-zinc-300">
-                  COMSATS Connect is dedicated to fostering a vibrant digital ecosystem where the COMSATS University community can collaborate, share knowledge, and build lasting professional relationships. We aim to bridge the gap between academic learning and real-world application by connecting students with alumni, faculty, and industry professionals.
+                ComsiConnect Connect is dedicated to fostering a vibrant digital ecosystem where the community can collaborate, share knowledge, and build lasting professional relationships. We aim to bridge the gap between academic learning and real-world application by connecting students with alumni, faculty, and industry professionals.
                 </p>
               </div>
             </div>
@@ -80,7 +80,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* What is COMSATS Connect */}
+      {/* What is ComsiConnect */}
       <section className="py-20 px-6 md:px-20">
         <div className="max-w-6xl mx-auto">
           <motion.h2 
@@ -90,7 +90,7 @@ const About = () => {
             transition={{ duration: 0.5 }}
             className="text-3xl font-bold mb-16 text-center"
           >
-            What is <span className="text-indigo-500">COMSATS Connect</span>?
+            What is <span className="text-indigo-500">ComsiConnect Connect</span>?
           </motion.h2>
           
           <motion.div 
@@ -109,7 +109,7 @@ const About = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-3">Community Platform</h3>
                 <p className="text-zinc-400">
-                  COMSATS Connect is an exclusive social network designed specifically for COMSATS University students, faculty, and alumni. It provides a safe and focused environment for academic and professional networking.
+                ComsiConnect is an exclusive social network designed specifically for University students, faculty, and alumni. It provides a safe and focused environment for academic and professional networking.
                 </p>
               </div>
             </motion.div>
@@ -137,7 +137,7 @@ const About = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-3">Project Collaboration</h3>
                 <p className="text-zinc-400">
-                  Find teammates for academic projects, hackathons, and research initiatives. COMSATS Connect makes it easy to discover peers with complementary skills and shared interests.
+                  Find teammates for academic projects, hackathons, and research initiatives. ComsiConnect makes it easy to discover peers with complementary skills and shared interests.
                 </p>
               </div>
             </motion.div>
@@ -179,7 +179,7 @@ const About = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-3">Campus Life</h3>
                 <p className="text-zinc-400">
-                  Stay updated on university events, club activities, and campus news. Participate in discussions about campus life, share experiences, and make the most of your time at COMSATS.
+                  Stay updated on university events, club activities, and campus news. Participate in discussions about campus life, share experiences, and make the most of your time at ComsiConnect.
                 </p>
               </div>
             </motion.div>
@@ -200,7 +200,7 @@ const About = () => {
         >
           <h2 className="text-3xl font-bold mb-4">Ready to Connect?</h2>
           <p className="text-lg text-indigo-100 mb-8">
-            Join thousands of COMSATS students and alumni already building their network.
+            Join thousands of  students and alumni already building their network.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/signup" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-md font-medium transition duration-300">

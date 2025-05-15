@@ -4,6 +4,8 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import User from '../models/user.js';
 import Post from '../models/post.js';
 import upload from "../config/multer.js";
+import axios from 'axios';
+import fetch from 'node-fetch'; // npm install node-fetch
 
 
 const router = express.Router();
@@ -164,6 +166,92 @@ router.get('/profile/:id', async (req, res) => {
   const user = await User.findOne({ _id: id }).select('-password');
   await user.populate(['followers', 'following']);
   res.status(200).json({user});
+});
+
+
+// Chatbot route
+router.post('/chat', async (req, res) => {
+  const { message } = req.body;
+
+  const SYSTEM_PROMPT = `You are ComsiConnect Bot, an AI assistant for students at ComsiConnect University. Answer questions clearly and concisely. Format all your responses in proper markdown with headings, bold, lists, and code blocks as needed, Like ChatGPT. If there are links, make them clickable or highlight them with different color. If there is code, make it a code block.
+
+  IMPORTANT: Make sure to separate each statement or paragraph with a blank line (i.e., add two newlines) so the output is easy to read and well spaced.
+
+  If the question is unrelated to ComsiConnect, politely say you specialize in ComsiConnect topics only. Your goal is to make answers easy to read and understand.`;
+
+
+  const API_KEY = process.env.OPENROUTER_TOKEN;
+  const MODEL = "deepseek/deepseek-r1:free";
+
+  try {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: message }
+        ],
+        stream: true
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error("OpenRouter API error:", error);
+      return res.status(500).json({ error });
+    }
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    const decoder = new TextDecoder();
+
+    // Listen for data chunks on the Node.js stream
+    response.body.on("data", (chunk) => {
+      const str = decoder.decode(chunk);
+
+      // Parse lines starting with "data:"
+      const lines = str.split("\n").filter(line => line.trim().startsWith("data:"));
+
+      for (const line of lines) {
+        const dataStr = line.replace(/^data:\s*/, '').trim();
+
+        if (dataStr === "[DONE]") {
+          res.end();
+          return;
+        }
+
+        try {
+          const data = JSON.parse(dataStr);
+          const content = data.choices?.[0]?.delta?.content;
+          if (content) {
+            res.write(content);
+          }
+        } catch (e) {
+          console.error("Error parsing stream chunk:", e);
+        }
+      }
+    });
+
+    response.body.on("end", () => {
+      res.end();
+    });
+
+    response.body.on("error", (err) => {
+      console.error("Stream error:", err);
+      res.end();
+    });
+
+  } catch (error) {
+    console.error("Chatbot streaming error:", error);
+    res.status(500).json({ error: "Failed to stream response from AI." });
+  }
 });
 
 

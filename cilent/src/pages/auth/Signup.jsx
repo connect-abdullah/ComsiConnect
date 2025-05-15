@@ -9,6 +9,7 @@ import {
   FaEye,
   FaEyeSlash,
 } from "react-icons/fa";
+import Navbar from "../../components/LandingPage/Navbar";
 import { signupUser } from "../../api/api";
 
 const Signup = () => {
@@ -85,24 +86,8 @@ const Signup = () => {
   return (
     <div className="bg-zinc-900 text-white min-h-screen flex flex-col">
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-zinc-800/80 backdrop-blur-sm px-6 py-4 flex justify-between items-center border-b border-zinc-700">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <motion.div
-            initial={{ rotate: -10 }}
-            animate={{ rotate: 10 }}
-            transition={{
-              duration: 0.5,
-              repeat: Infinity,
-              repeatType: "reverse",
-            }}
-            className="bg-indigo-600 w-8 h-8 rounded-lg flex items-center justify-center"
-          >
-            <span className="font-bold">C</span>
-          </motion.div>
-          <span className="font-bold text-xl">COMSATS Connect</span>
-        </Link>
-      </nav>
+        <Navbar />
+
 
       {/* Signup Form Section */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
@@ -115,7 +100,7 @@ const Signup = () => {
           <div className="bg-zinc-800 rounded-xl border border-zinc-700 shadow-xl overflow-hidden">
             {/* Form Header */}
             <div className="bg-gradient-to-r from-indigo-700 to-indigo-600 px-6 py-8 text-center">
-              <h2 className="text-2xl font-bold mb-2">Join COMSATS Connect</h2>
+              <h2 className="text-2xl font-bold mb-2">Join ComsiConnect Connect</h2>
               <p className="text-indigo-200">
                 Create your account to get started
               </p>
@@ -227,6 +212,7 @@ const Signup = () => {
                       required
                       value={formData.password}
                       onChange={handleChange}
+                      minLength={8}
                       className="block w-full pl-10 pr-3 py-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white"
                       placeholder="••••••••"
                     />
@@ -338,7 +324,7 @@ const Signup = () => {
 
           {/* Decorative Element */}
           <div className="mt-8 text-center text-zinc-500 text-sm">
-            <p>© 2025 COMSATS Connect. All rights reserved.</p>
+            <p>© 2025 ComsiConnect Connect. All rights reserved.</p>
           </div>
         </motion.div>
       </div>

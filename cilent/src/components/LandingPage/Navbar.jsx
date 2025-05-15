@@ -14,7 +14,7 @@ const Navbar = () => {
       >
         <span className="font-bold">C</span>
       </motion.div>
-      <span className="font-bold text-xl">COMSATS Connect</span>
+      <span className="font-bold text-xl">ComsiConnect</span>
     </a>
     
     {/* Auth Buttons */}
