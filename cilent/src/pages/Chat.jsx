@@ -122,10 +122,7 @@ export default function ChatBot() {
                             ),
                             code: ({node, ...props}) => (
                               <code {...props} className="text-white bg-zinc-700 p-1 break-words" />
-                            ),
-                            b: ({node, ...props}) => (
-                              <b {...props} className="text-red-500 font-bold break-words" />
-                            ),
+                            )
                           }}
                         >
                           {msg.text}

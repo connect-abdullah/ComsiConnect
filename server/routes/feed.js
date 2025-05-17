@@ -97,10 +97,13 @@ router.get('/posts', async (req, res) => {
     const currentUser = await User.findOne({ username: req.session.passport.user });
     if (!currentUser) return res.status(401).json({ message: 'Unauthorized' });
 
+    // All Posts
     let posts = await Post.find()
       .populate('user')
+      .populate('repostedBy')
       .lean(); 
 
+      // Following Posts
     let followingPosts = await Post.find({
       user: { $in: currentUser.following }
     }).populate('user').lean();
@@ -134,6 +137,7 @@ router.get('/posts', async (req, res) => {
         }
       };
     });
+
 
       // Weighted shuffle: favor newer posts but allow randomness
       const now = new Date().getTime();

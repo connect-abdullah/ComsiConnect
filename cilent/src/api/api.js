@@ -170,6 +170,7 @@ export const getPosts = async () => {
           window.location.href = '/login';
           throw new Error('Unauthorized');
         }
+        // console.log("response of get posts api --> ", response.data)
         return response.data;
     } catch (error) {
         throw error;

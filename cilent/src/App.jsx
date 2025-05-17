@@ -14,7 +14,7 @@ import ForgotPass from "./pages/auth/ForgotPass";
 import VerifyOTP from "./pages/auth/VerifyOTP";
 import ViewProfile from "./pages/profileSection/ViewProfile";
 import FollowList from './pages/profileSection/FollowList';
-import ChatBot from "./pages/Chat";
+import ChatBot from "./pages/Chat.jsx";
 
 function App() {
   return (

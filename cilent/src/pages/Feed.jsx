@@ -25,12 +25,33 @@ const Feed = () => {
   const [searchResults, setSearchResults] = useState([])
   const navigate = useNavigate()
 
-  // Fetch all posts
+  // Fetch all posts and process them to include reposts
   useEffect(() => {
     const fetchPosts = async () => {
       const response = await getPosts()
+      
+      // Process posts to include reposts as separate entries
+      let allPosts = []
+      response?.posts?.forEach(post => {
+        // Add original post
+        allPosts.push(post)
+        
+        // Add reposted versions as separate posts
+        if (post.repostedBy && post.repostedBy.length > 0) {
+          post.repostedBy.forEach(reposter => {
+            const repost = {
+              ...post,
+              _id: `${post._id}-repost-${reposter._id}`, // Unique ID for repost
+              repostedByUser: reposter
+            }
+            // Insert repost at random position
+            const randomIndex = Math.floor(Math.random() * (allPosts.length + 4))
+            allPosts.splice(randomIndex, 0, repost)
+          })
+        }
+      })
 
-      setPosts(response?.posts)
+      setPosts(allPosts)
       setFollowingPosts(response?.followingPosts)
       setLoading(false)
     }
@@ -114,20 +135,43 @@ const Feed = () => {
   const handlePostInteraction = async (postId, interactionType) => {
     try {
       const response = await interaction(postId, interactionType)
-      setPosts((prevPosts) => prevPosts.map((post) => {
-        if (post._id === postId) {
-          // Preserve the isFollowed status when updating the post
-          const isFollowed = post.user?.isFollowed;
-          return {
-            ...response,
-            user: {
-              ...response.user,
-              isFollowed: isFollowed
+      
+      setPosts(prevPosts => {
+        return prevPosts.map(post => {
+          // Handle original post update
+          if (post._id === postId) {
+            const updatedPost = {
+              ...response,
+              user: {
+                ...response?.user,
+                isFollowed: post?.user?.isFollowed
+              }
             }
-          };
-        }
-        return post;
-      }))
+            return updatedPost
+          }
+          
+          // Handle repost updates
+          if (post._id.startsWith(`${postId}-repost-`)) {
+            return {
+              ...post,
+              isLiked: response?.isLiked,
+              likedBy: response?.likedBy,
+              isReposted: response?.isReposted,
+              repostedBy: response?.repostedBy,
+              isSaved: response?.isSaved
+            }
+          }
+          
+          return post
+        }).filter(post => {
+          // Remove repost if user undid their repost
+          if (interactionType === 'repost' && !response.isReposted) {
+            return !post._id.includes(`${postId}-repost-${user._id}`)
+          }
+          return true
+        })
+      })
+      
     } catch (error) {
       console.error(`Failed to ${interactionType} post:`, error)
     }
@@ -175,8 +219,8 @@ const Feed = () => {
     if (posts && posts.length > 0) {
       const initialStatus = {}
       posts.forEach((post) => {
-        if (post.user && post.user._id) {
-          initialStatus[post.user._id] = post.user.isFollowed || false
+        if (post?.user && post?.user?._id) {
+          initialStatus[post?.user?._id] = post?.user?.isFollowed || false
         }
       })
       setFollowedStatus(initialStatus)
@@ -351,7 +395,16 @@ const Feed = () => {
                 className="bg-zinc-800 rounded-xl border border-zinc-700 p-3 sm:p-4"
               >
                 {/* Post Header */}
-                <div className="flex gap-2 sm:gap-3 mb-3">
+                {post?.repostedByUser && (
+                  <div className="flex items-center gap-2 sm:gap-3 bg-[#38383f] rounded-lg p-2 w-full mb-4">
+                    <FaRetweet className="text-green-400 text-xs sm:text-sm" />
+                    <span className="text-xs sm:text-sm">
+                      Reposted by <span className="font-bold text-[#b3bbb6]">@{post?.repostedByUser?.username}</span>
+                    </span>
+                  </div>
+                )}
+
+                <div className={`flex gap-2 sm:gap-3 mb-3`}>
                   <div className="w-8 h-8 sm:w-10 sm:h-10 bg-indigo-600 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden">
                     <img
                       src={post?.user?.avatar ||"/placeholder.svg"}
@@ -412,7 +465,7 @@ const Feed = () => {
                   {/* Like */}
                   <motion.button
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => handlePostInteraction(post?._id, "like")}
+                    onClick={() => handlePostInteraction(post?._id.split('-repost-')[0], "like")}
                     className="flex items-center gap-1 text-zinc-400 hover:text-red-500 transition"
                   >
                     <motion.div
@@ -433,7 +486,7 @@ const Feed = () => {
                   {/* Repost */}
                   <motion.button
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => handlePostInteraction(post?._id, "repost")}
+                    onClick={() => handlePostInteraction(post?._id.split('-repost-')[0], "repost")}
                     className="flex items-center gap-1 text-zinc-400 hover:text-green-500 transition"
                   >
                     <motion.div
@@ -453,7 +506,7 @@ const Feed = () => {
                   {/* Save */}
                   <motion.button
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => handlePostInteraction(post?._id, "save")}
+                    onClick={() => handlePostInteraction(post?._id.split('-repost-')[0], "save")}
                     className={`text-${post?.isSaved ? "indigo" : "zinc"}-400 hover:text-indigo-400 transition`}
                   >
                     <motion.div

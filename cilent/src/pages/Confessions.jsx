@@ -319,7 +319,7 @@ const Confessions = () => {
                   </motion.span>
                 </motion.button>
 
-                {/* Repost */}
+                {/* Repost
                 <motion.button 
                   whileTap={{ scale: 0.9 }}
                   onClick={() => handleConfessionInteraction(confession._id, 'repost')}
@@ -340,7 +340,7 @@ const Confessions = () => {
                   >
                     {confession.repostedBy?.length || 0}
                   </motion.span>
-                </motion.button>
+                </motion.button> */}
 
                 {/* Save */}
                 <motion.button 
