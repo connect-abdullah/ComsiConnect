@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { FaKey, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'
 import { verifyOTP } from '../../api/api'
 import Navbar from '../../components/LandingPage/Navbar'
+import Aurora from '../../components/Aurora'
 
 const VerifyOTP = () => {
   const navigate = useNavigate();
@@ -104,164 +105,187 @@ const VerifyOTP = () => {
   };
 
   return (
-    <div className="bg-zinc-900 text-white min-h-screen flex flex-col">
-      {/* Navbar */}
-      <Navbar />
+    <div className="relative bg-zinc-900 text-white min-h-screen flex flex-col">
+      {/* Aurora Background */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <Aurora
+          colorStops={["#3A29FF", "#4F46E5", "#FF3232"]}
+          blend={0.8}
+          amplitude={1.3}
+          speed={0.9}
+        />
+      </div>
+      
+      {/* Content with relative positioning to appear above Aurora */}
+      <div className="relative z-10 flex flex-col min-h-screen">
+        {/* Navbar */}
+        <Navbar />
 
-      {/* Verify OTP Form Section */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="w-full max-w-md"
-        >
-          <div className="bg-zinc-800 rounded-xl border border-zinc-700 shadow-xl overflow-hidden">
-            {/* Form Header */}
-            <div className="bg-gradient-to-r from-indigo-700 to-indigo-600 px-6 py-8 text-center">
-              <h2 className="text-2xl font-bold mb-2">Reset Password</h2>
-              <p className="text-indigo-200">Enter OTP and your new password</p>
-            </div>
-            
-            {/* Form Body */}
-            <div className="p-6">
-              {/* Success Message */}
-              {successMessage && (
-                <div className="mb-6 p-3 bg-green-600/20 border border-green-500 rounded-md text-green-200 text-center">
-                  {successMessage}
-                </div>
-              )}
+        {/* Verify OTP Form Section */}
+        <div className="flex-1 flex items-center justify-center px-6 py-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="w-full max-w-md"
+          >
+            <div className="bg-zinc-800 rounded-xl border border-zinc-700 shadow-xl overflow-hidden">
+              {/* Form Header */}
+              <div className="bg-gradient-to-r from-indigo-700 to-indigo-600 px-6 py-8 text-center">
+                <h2 className="text-2xl font-bold mb-2">Reset Password</h2>
+                <p className="text-indigo-200">Enter OTP and your new password</p>
+              </div>
               
-              {/* Error Message */}
-              {error && (
-                <div className="mb-6 p-3 bg-red-500/20 border border-red-500 rounded-md text-red-200 text-center">
-                  {error}
-                </div>
-              )}
-              
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* OTP Field */}
-                <div className="space-y-2">
-                  <label htmlFor="otp" className="block text-sm font-medium text-zinc-300">
-                    OTP Code
-                    <span className="float-right text-zinc-400">
-                      {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
-                    </span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaKey className="text-zinc-500" />
-                    </div>
-                    <input
-                      id="otp"
-                      name="otp"
-                      type="text"
-                      required
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      className="block w-full pl-10 pr-3 py-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white"
-                      placeholder="Enter OTP code"
-                    />
+              {/* Form Body */}
+              <div className="p-6">
+                {/* Success Message */}
+                {successMessage && (
+                  <div className="mb-6 p-3 bg-green-600/20 border border-green-500 rounded-md text-green-200 text-center">
+                    {successMessage}
                   </div>
-                </div>
-
-                {/* New Password Field */}
-                <div className="space-y-2">
-                  <label htmlFor="newPassword" className="block text-sm font-medium text-zinc-300">New Password</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaLock className="text-zinc-500" />
+                )}
+                
+                {/* Error Message */}
+                {error && (
+                  <div className="mb-6 p-3 bg-red-500/20 border border-red-500 rounded-md text-red-200 text-center">
+                    {error}
+                  </div>
+                )}
+                
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* OTP Field */}
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <label htmlFor="otp" className="block text-sm font-medium text-zinc-300">
+                        OTP Code
+                      </label>
+                      <span className="text-sm font-medium bg-indigo-900/40 text-indigo-300 px-2 py-1 rounded-md">
+                        {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+                      </span>
                     </div>
-                    <input
-                      id="newPassword"
-                      name="newPassword"
-                      type={showPassword ? "text" : "password"}
-                      required
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className="block w-full pl-10 pr-10 py-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white"
-                      placeholder="Enter new password"
-                    />
+                    
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <FaKey className="text-indigo-400" />
+                      </div>
+                      <input
+                        id="otp"
+                        name="otp"
+                        type="text"
+                        required
+                        maxLength={6}
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
+                        className="block w-full pl-10 pr-3 py-3.5 bg-zinc-700/80 border border-indigo-500/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white text-center tracking-widest font-mono text-lg"
+                        placeholder="• • • • • •"
+                      />
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-indigo-300">
+                        {otp.length}/6
+                      </div>
+                    </div>
+                    <p className="text-xs text-zinc-400 text-center">
+                      Enter the 6-digit code sent to your email
+                    </p>
+                  </div>
+
+                  {/* New Password Field */}
+                  <div className="space-y-2">
+                    <label htmlFor="newPassword" className="block text-sm font-medium text-zinc-300">New Password</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <FaLock className="text-zinc-500" />
+                      </div>
+                      <input
+                        id="newPassword"
+                        name="newPassword"
+                        type={showPassword ? "text" : "password"}
+                        required
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className="block w-full pl-10 pr-10 py-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white"
+                        placeholder="Enter new password"
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <FaEyeSlash className="text-zinc-500" /> : <FaEye className="text-zinc-500" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Confirm Password Field */}
+                  <div className="space-y-2">
+                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-zinc-300">Confirm Password</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <FaLock className="text-zinc-500" />
+                      </div>
+                      <input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        required
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="block w-full pl-10 pr-10 py-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white"
+                        placeholder="Confirm new password"
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? <FaEyeSlash className="text-zinc-500" /> : <FaEye className="text-zinc-500" />}
+                      </button>
+                    </div>
+                  </div>
+                
+                  {/* Submit Button with Loading State */}
+                  <div>
                     <button
-                      type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                      onClick={() => setShowPassword(!showPassword)}
+                      type="submit"
+                      disabled={isLoading}
+                      className={`w-full px-4 py-3 ${
+                        isLoading ? 'bg-indigo-700 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
+                      } rounded-md font-medium transition duration-300 flex items-center justify-center`}
                     >
-                      {showPassword ? <FaEyeSlash className="text-zinc-500" /> : <FaEye className="text-zinc-500" />}
+                      {isLoading ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Resetting Password...
+                        </>
+                      ) : (
+                        'Reset Password'
+                      )}
                     </button>
                   </div>
-                </div>
 
-                {/* Confirm Password Field */}
-                <div className="space-y-2">
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-zinc-300">Confirm Password</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaLock className="text-zinc-500" />
-                    </div>
-                    <input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      required
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="block w-full pl-10 pr-10 py-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white"
-                      placeholder="Confirm new password"
-                    />
-                    <button
+                  {/* Resend OTP Link */}
+                  <div className="text-center mt-4">
+                    <button 
                       type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() => navigate('/forgot-pass')}
+                      disabled={!canResend}
+                      className={`text-indigo-400 hover:text-indigo-300 text-sm ${!canResend && 'opacity-50 cursor-not-allowed'}`}
                     >
-                      {showConfirmPassword ? <FaEyeSlash className="text-zinc-500" /> : <FaEye className="text-zinc-500" />}
+                      {canResend ? "Didn't receive code? Request again" : "Please wait before requesting new code"}
                     </button>
                   </div>
-                </div>
-              
-                {/* Submit Button with Loading State */}
-                <div>
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className={`w-full px-4 py-3 ${
-                      isLoading ? 'bg-indigo-700 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
-                    } rounded-md font-medium transition duration-300 flex items-center justify-center`}
-                  >
-                    {isLoading ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Resetting Password...
-                      </>
-                    ) : (
-                      'Reset Password'
-                    )}
-                  </button>
-                </div>
-
-                {/* Resend OTP Link */}
-                <div className="text-center mt-4">
-                  <button 
-                    type="button"
-                    onClick={() => navigate('/forgot-pass')}
-                    disabled={!canResend}
-                    className={`text-indigo-400 hover:text-indigo-300 text-sm ${!canResend && 'opacity-50 cursor-not-allowed'}`}
-                  >
-                    {canResend ? "Didn't receive code? Request again" : "Please wait before requesting new code"}
-                  </button>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
-          </div>
 
-          {/* Decorative Element */}
-          <div className="mt-8 text-center text-zinc-500 text-sm">
-            <p>© 2025 ComsiConnect. All rights reserved.</p>
-          </div>
-        </motion.div>
+            {/* Decorative Element */}
+            <div className="mt-8 text-center text-zinc-500 text-sm">
+              <p>© 2025 ComsiConnect. All rights reserved.</p>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </div>
   )
