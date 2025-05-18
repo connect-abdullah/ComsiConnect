@@ -3,6 +3,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://comsiconnect.onrender.com/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
