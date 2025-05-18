@@ -18,7 +18,7 @@ var app = express();
 import cors from "cors";
 app.use(
   cors({
-    origin: "http://localhost:5173", // Your frontend URL
+    origin: ["http://localhost:5173", "https://comsats-social-media.vercel.app"], // Your frontend URLs
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -46,6 +46,8 @@ mongoose
     console.log("Error connecting to MongoDB", err);
   });
 
+app.set("trust proxy", 1);
+
 app.use(
   expressSession({
     resave: false,
@@ -57,6 +59,8 @@ app.use(
     }),
     cookie: {
       maxAge: 24 * 60 * 60 * 1000,
+      sameSite: "none", 
+      secure: true  
     },
   })
 );
