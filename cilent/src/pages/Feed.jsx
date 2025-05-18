@@ -32,106 +32,6 @@ const Feed = () => {
   const COMMENTS_INCREMENT = 4 // Additional comments to load
   const navigate = useNavigate()
 
-  // Fetch comments for a post
-  const fetchComments = async (postId) => {
-    try {
-      const response = await getComments(postId)
-      setComments(prev => ({
-        ...prev,
-        [postId]: response
-      }))
-      // Initialize visible comments count
-      setVisibleComments(prev => ({
-        ...prev,
-        [postId]: COMMENTS_PER_PAGE
-      }))
-    } catch (error) {
-      console.error("Failed to fetch comments:", error)
-    }
-  }
-
-  // Handle comment submission
-  const handleSubmitComment = async (postId) => {
-    if (!newComment.trim()) return
-    
-    setIsPostingComment(true)
-    try {
-      const response = await addComment(postId, { content: newComment })
-      setComments(prev => ({
-        ...prev,
-        [postId]: response
-      }))
-      // Update visible comments if needed
-      setVisibleComments(prev => ({
-        ...prev,
-        [postId]: Math.max(prev[postId] || COMMENTS_PER_PAGE, response.length)
-      }))
-      // Update post comment count in the posts state
-      setPosts(prev => prev.map(post => {
-        if (post._id.split('-repost-')[0] === postId) {
-          return {
-            ...post,
-            comments: response
-          }
-        }
-        return post
-      }))
-      setNewComment("")
-    } catch (error) {
-      console.error("Failed to post comment:", error)
-    }
-    setIsPostingComment(false)
-  }
-
-  // Handle comment deletion
-  const handleDeleteComment = async (postId, commentId) => {
-    try {
-      await deleteComment(postId, commentId)
-      // Remove comment from state
-      const updatedComments = comments[postId].filter(comment => comment._id !== commentId)
-      setComments(prev => ({
-        ...prev,
-        [postId]: updatedComments
-      }))
-      // Update visible comments count if needed
-      setVisibleComments(prev => ({
-        ...prev,
-        [postId]: Math.min(prev[postId], updatedComments.length)
-      }))
-      // Update post comment count in the posts state
-      setPosts(prev => prev.map(post => {
-        if (post._id.split('-repost-')[0] === postId) {
-          return {
-            ...post,
-            comments: updatedComments
-          }
-        }
-        return post
-      }))
-    } catch (error) {
-      console.error("Failed to delete comment:", error)
-    }
-  }
-
-  // Handle loading more comments
-  const handleLoadMoreComments = (postId) => {
-    setVisibleComments(prev => ({
-      ...prev,
-      [postId]: (prev[postId] || COMMENTS_PER_PAGE) + COMMENTS_INCREMENT
-    }))
-  }
-
-  // Handle comment section toggle
-  const handleCommentClick = async (postId) => {
-    if (showComments === postId) {
-      setShowComments(null)
-    } else {
-      setShowComments(postId)
-      if (!comments[postId]) {
-        await fetchComments(postId)
-      }
-    }
-  }
 
   // Fetch all posts and process them to include reposts
   useEffect(() => {
@@ -211,6 +111,108 @@ const Feed = () => {
       setPreviewImages([...previewImages, ...newPreviewImages])
     }
   }
+
+    // Fetch comments for a post
+    const fetchComments = async (postId) => {
+      try {
+        const response = await getComments(postId)
+        setComments(prev => ({
+          ...prev,
+          [postId]: response
+        }))
+        // Initialize visible comments count
+        setVisibleComments(prev => ({
+          ...prev,
+          [postId]: COMMENTS_PER_PAGE
+        }))
+      } catch (error) {
+        console.error("Failed to fetch comments:", error)
+      }
+    }
+  
+    // Handle comment submission
+    const handleSubmitComment = async (postId) => {
+      if (!newComment.trim()) return
+      
+      setIsPostingComment(true)
+      try {
+        const response = await addComment(postId, { content: newComment })
+        setComments(prev => ({
+          ...prev,
+          [postId]: response
+        }))
+        // Update visible comments if needed
+        setVisibleComments(prev => ({
+          ...prev,
+          [postId]: Math.max(prev[postId] || COMMENTS_PER_PAGE, response.length)
+        }))
+        // Update post comment count in the posts state
+        setPosts(prev => prev.map(post => {
+          if (post._id.split('-repost-')[0] === postId) {
+            return {
+              ...post,
+              comments: response
+            }
+          }
+          return post
+        }))
+        setNewComment("")
+      } catch (error) {
+        console.error("Failed to post comment:", error)
+      }
+      setIsPostingComment(false)
+    }
+  
+    // Handle comment deletion
+    const handleDeleteComment = async (postId, commentId) => {
+      try {
+        await deleteComment(postId, commentId)
+        // Remove comment from state
+        const updatedComments = comments[postId].filter(comment => comment._id !== commentId)
+        setComments(prev => ({
+          ...prev,
+          [postId]: updatedComments
+        }))
+        // Update visible comments count if needed
+        setVisibleComments(prev => ({
+          ...prev,
+          [postId]: Math.min(prev[postId], updatedComments.length)
+        }))
+        // Update post comment count in the posts state
+        setPosts(prev => prev.map(post => {
+          if (post._id.split('-repost-')[0] === postId) {
+            return {
+              ...post,
+              comments: updatedComments
+            }
+          }
+          return post
+        }))
+      } catch (error) {
+        console.error("Failed to delete comment:", error)
+      }
+    }
+  
+    // Handle loading more comments
+    const handleLoadMoreComments = (postId) => {
+      setVisibleComments(prev => ({
+        ...prev,
+        [postId]: (prev[postId] || COMMENTS_PER_PAGE) + COMMENTS_INCREMENT
+      }))
+    }
+  
+    // Handle comment section toggle
+    const handleCommentClick = async (postId) => {
+      if (showComments === postId) {
+        setShowComments(null)
+      } else {
+        setShowComments(postId)
+        if (!comments[postId]) {
+          await fetchComments(postId)
+        }
+      }
+    }
+  
 
   // Handle remove image
   const handleRemoveImage = (index) => {
