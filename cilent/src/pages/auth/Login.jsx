@@ -44,7 +44,7 @@ const Login = () => {
       // Make login request to your API
       const response = await loginUser(credentials);
       
-      console.log('Login successful:', response);
+      // console.log('Login successful:', response);
       
       // Store the token
       if (response?.data?.token) {

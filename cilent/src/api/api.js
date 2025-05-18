@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = "https://comsiconnect.onrender.com";
+const API_URL = "/api";
 
 const api = axios.create({
     baseURL: API_URL,
@@ -408,7 +408,7 @@ export const deleteConfession = async (postId) => {
 // Chatbot Api
 export const chatbot = async (message) => {
   try {
-    const response = await fetch(`${API_URL}/users/chat`, {
+    const response = await fetch(`api/users/chat`, {
       method: "POST", 
       headers: { "Content-Type": "application/json" },
       credentials: "include",
