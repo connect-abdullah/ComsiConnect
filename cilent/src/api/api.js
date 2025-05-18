@@ -1,6 +1,7 @@
 import axios from 'axios';
-
-const API_URL = 'https://comsiconnect.onrender.com';
+import dotenv from 'dotenv';
+dotenv.config();
+const API_URL = process.env.API_URL;
 
 const api = axios.create({
     baseURL: API_URL,

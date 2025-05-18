@@ -18,7 +18,7 @@ var app = express();
 import cors from "cors";
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://comsats-social-media.vercel.app"], // Your frontend URLs
+    origin: [process.env.Frontend_URL, "http://localhost:5173"], // Your frontend URLs
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
