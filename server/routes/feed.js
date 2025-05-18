@@ -209,4 +209,41 @@ if (action === "follow") {
   }
 })
 
+// Add comment to post  
+router.post('/post/:postId/comment', async (req,res) => {
+  const {postId} = req?.params;
+  const {content} = req?.body;
+  const user = await User.findOne({username : req?.session?.passport?.user});
+  const post = await Post.findById(postId);
+
+  if (!post) return res.status(404).json({message: "Post not found"});
+  if (!user) return res.status(401).json({message: "Unauthorized"});
+
+  post?.comments?.push({content : content, user: user?._id});
+  await post.save();
+  const populatedPost = await post?.populate('comments.user');
+
+  res.status(200).json(populatedPost?.comments);
+})
+
+// Get comments for a post
+router.get('/post/:postId/comments', async (req,res) => {
+  const {postId} = req?.params;
+  const post = await Post.findById(postId).populate('comments.user');
+  if (!post) return res.status(404).json({message: "Post not found"});
+  // console.log("comments of get comments api --> ", post.comments)
+  res.status(200).json(post.comments);
+})
+
+// Delete Comment
+router.delete('/post/:postId/comment/:commentId', async (req,res) => {
+  const {postId, commentId} = req?.params;
+  const post = await Post.findById(postId);
+  if (!post) return res.status(404).json({message: "Post not found"});
+
+  post.comments.pull(commentId);
+  await post.save();
+  res.status(200).json({message: "Comment deleted successfully"});
+})  
+
 export default router;

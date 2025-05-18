@@ -208,10 +208,48 @@ export const followUser = async (userId, action) => {
     throw error;
   }
 };
+// Add comment to post
+export const addComment = async (postId, content) => {
+  try {
+    const response = await api.post(`/feed/post/${postId}/comment`, content);
+    if (response.status === 401) {
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
+    // console.log("response of add comment api --> ", response)
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
+// Get comments for a post
+export const getComments = async (postId) => {
+  try {
+    const response = await api.get(`/feed/post/${postId}/comments`);
+    if (response.status === 401) {
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
-
-
+// Delete comment
+export const deleteComment = async (postId, commentId) => {
+  try {
+    const response = await api.delete(`/feed/post/${postId}/comment/${commentId}`);
+    if (response.status === 401) {
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
 
 // Profile Routes

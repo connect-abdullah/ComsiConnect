@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect  } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
-import { FaHeart, FaRetweet, FaBookmark, FaImage, FaTimes, FaRegHeart, FaRegBookmark, FaDownload, FaSearch } from "react-icons/fa"
+import { FaHeart, FaRetweet, FaBookmark, FaImage, FaTimes, FaRegHeart, FaRegBookmark, FaDownload, FaSearch, FaComment, FaTrash } from "react-icons/fa"
 import Navbar from "../components/Navbar"
-import { post, interaction, getPosts, getUser, followUser } from "../api/api"
+import { post, interaction, getPosts, getUser, followUser, getComments, addComment, deleteComment } from "../api/api"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 dayjs.extend(relativeTime)
@@ -23,7 +23,115 @@ const Feed = () => {
   const [showFollowing, setShowFollowing] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState([])
+  const [showComments, setShowComments] = useState(null)
+  const [comments, setComments] = useState({})
+  const [newComment, setNewComment] = useState("")
+  const [isPostingComment, setIsPostingComment] = useState(false)
+  const [visibleComments, setVisibleComments] = useState({}) // Track number of visible comments per post
+  const COMMENTS_PER_PAGE = 3 // Initial comments to show
+  const COMMENTS_INCREMENT = 4 // Additional comments to load
   const navigate = useNavigate()
+
+  // Fetch comments for a post
+  const fetchComments = async (postId) => {
+    try {
+      const response = await getComments(postId)
+      setComments(prev => ({
+        ...prev,
+        [postId]: response
+      }))
+      // Initialize visible comments count
+      setVisibleComments(prev => ({
+        ...prev,
+        [postId]: COMMENTS_PER_PAGE
+      }))
+    } catch (error) {
+      console.error("Failed to fetch comments:", error)
+    }
+  }
+
+  // Handle comment submission
+  const handleSubmitComment = async (postId) => {
+    if (!newComment.trim()) return
+    
+    setIsPostingComment(true)
+    try {
+      const response = await addComment(postId, { content: newComment })
+      setComments(prev => ({
+        ...prev,
+        [postId]: response
+      }))
+      // Update visible comments if needed
+      setVisibleComments(prev => ({
+        ...prev,
+        [postId]: Math.max(prev[postId] || COMMENTS_PER_PAGE, response.length)
+      }))
+      // Update post comment count in the posts state
+      setPosts(prev => prev.map(post => {
+        if (post._id.split('-repost-')[0] === postId) {
+          return {
+            ...post,
+            comments: response
+          }
+        }
+        return post
+      }))
+      setNewComment("")
+    } catch (error) {
+      console.error("Failed to post comment:", error)
+    }
+    setIsPostingComment(false)
+  }
+
+  // Handle comment deletion
+  const handleDeleteComment = async (postId, commentId) => {
+    try {
+      await deleteComment(postId, commentId)
+      // Remove comment from state
+      const updatedComments = comments[postId].filter(comment => comment._id !== commentId)
+      setComments(prev => ({
+        ...prev,
+        [postId]: updatedComments
+      }))
+      // Update visible comments count if needed
+      setVisibleComments(prev => ({
+        ...prev,
+        [postId]: Math.min(prev[postId], updatedComments.length)
+      }))
+      // Update post comment count in the posts state
+      setPosts(prev => prev.map(post => {
+        if (post._id.split('-repost-')[0] === postId) {
+          return {
+            ...post,
+            comments: updatedComments
+          }
+        }
+        return post
+      }))
+    } catch (error) {
+      console.error("Failed to delete comment:", error)
+    }
+  }
+
+  // Handle loading more comments
+  const handleLoadMoreComments = (postId) => {
+    setVisibleComments(prev => ({
+      ...prev,
+      [postId]: (prev[postId] || COMMENTS_PER_PAGE) + COMMENTS_INCREMENT
+    }))
+  }
+
+  // Handle comment section toggle
+  const handleCommentClick = async (postId) => {
+    if (showComments === postId) {
+      setShowComments(null)
+    } else {
+      setShowComments(postId)
+      if (!comments[postId]) {
+        await fetchComments(postId)
+      }
+    }
+  }
 
   // Fetch all posts and process them to include reposts
   useEffect(() => {
@@ -47,7 +155,7 @@ const Feed = () => {
                 repostedByUser: reposter
               }
               // Insert repost at random position
-              const randomIndex = Math.floor(Math.random() * (allPosts.length + 4))
+              const randomIndex = Math.floor(Math.random() * (allPosts.length + 1))
               allPosts.splice(randomIndex, 0, repost)
             }
           })
@@ -59,7 +167,7 @@ const Feed = () => {
       setLoading(false)
     }
     fetchPosts()
-  }, [])
+  }, [user?._id])
 
   // Handle search input change
   const handleSearchChange = (e) => {
@@ -486,6 +594,18 @@ const Feed = () => {
                     </motion.span>
                   </motion.button>
 
+                  {/* Comment */}
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => handleCommentClick(post?._id.split('-repost-')[0])}
+                    className="flex items-center gap-1 text-zinc-400 hover:text-blue-500 transition"
+                  >
+                    <FaComment className={showComments === post?._id.split('-repost-')[0] ? "text-blue-500" : ""} />
+                    <span className={showComments === post?._id.split('-repost-')[0] ? "text-blue-500" : ""}>
+                      {post?.comments?.length || 0}
+                    </span>
+                  </motion.button>
+
                   {/* Repost */}
                   <motion.button
                     whileTap={{ scale: 0.9 }}
@@ -520,6 +640,103 @@ const Feed = () => {
                     </motion.div>
                   </motion.button>
                 </div>
+
+                {/* Comments Section */}
+                {showComments === post?._id.split('-repost-')[0] && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="mt-4 border-t border-zinc-700 pt-4"
+                  >
+                    {/* Comment Input */}
+                    <div className="flex gap-2 mb-4">
+                      <div className="w-8 h-8 bg-indigo-600 rounded-full flex-shrink-0">
+                        <img
+                          src={user?.avatar || "/placeholder.svg"}
+                          alt={user?.fullName}
+                          className="w-full h-full object-cover rounded-full"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          value={newComment}
+                          onChange={(e) => setNewComment(e.target.value)}
+                          placeholder="Write a comment..."
+                          className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <button
+                        onClick={() => handleSubmitComment(post?._id.split('-repost-')[0])}
+                        disabled={!newComment.trim() || isPostingComment}
+                        className={`px-4 py-2 rounded-md text-sm font-medium text-white transition ${
+                          !newComment.trim() || isPostingComment
+                            ? "bg-indigo-600/50 cursor-not-allowed"
+                            : "bg-indigo-600 hover:bg-indigo-700"
+                        }`}
+                      >
+                        {isPostingComment ? "..." : "Post"}
+                      </button>
+                    </div>
+
+                    {/* Comments List */}
+                    <div className="space-y-4">
+                      {comments[post?._id.split('-repost-')[0]]?.slice(0, visibleComments[post?._id.split('-repost-')[0]] || COMMENTS_PER_PAGE)
+                        .map((comment) => (
+                        <motion.div 
+                          key={comment?._id} 
+                          className="flex gap-3 hover:bg-zinc-800/50 p-2 rounded-lg transition-colors duration-200"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <div className="w-7 h-7 bg-indigo-600 rounded-full flex-shrink-0 ring-2 ring-indigo-500/20">
+                            <img
+                              src={comment?.user?.avatar || "/placeholder.svg"}
+                              alt={comment?.user?.fullName}
+                              className="w-7 h-7 object-cover rounded-full cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={() => handleViewProfile(comment?.user?._id)}
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center flex-wrap gap-2 mb-1">
+                              <span 
+                                className="font-semibold text-sm cursor-pointer hover:text-indigo-400 transition-colors" 
+                                onClick={() => handleViewProfile(comment?.user?._id)}
+                              >
+                                {comment?.user?.fullName}
+                              </span>
+                              <span className="text-zinc-400 text-xs font-medium">@{comment?.user?.username}</span>
+                              <span className="text-zinc-500 text-xs">{dayjs(comment?.createdAt).fromNow()}</span>
+                              {comment?.user?._id === user?._id && (
+                                <button
+                                  onClick={() => handleDeleteComment(post?._id.split('-repost-')[0], comment?._id)}
+                                  className="text-red-500 text-xs hover:text-red-600 transition-colors"
+                                >
+                                  <FaTrash />
+                                </button>
+                              )}
+                            </div>
+                            <div className="bg-zinc-700/50 rounded-lg p-3 mt-2">
+                              <p className="text-sm text-zinc-100">{comment?.content}</p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                      
+                      {/* Show More Comments Button */}
+                      {comments[post?._id.split('-repost-')[0]]?.length > (visibleComments[post?._id.split('-repost-')[0]] || COMMENTS_PER_PAGE) && (
+                        <button
+                          onClick={() => handleLoadMoreComments(post?._id.split('-repost-')[0])}
+                          className="w-full py-2 text-sm text-indigo-400 hover:text-indigo-300 transition-colors bg-zinc-700/30 rounded-lg mt-4"
+                        >
+                          Show More Comments
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
               </motion.div>
             ))}
         </div>
