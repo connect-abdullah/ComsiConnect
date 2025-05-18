@@ -94,9 +94,9 @@ export const signupUser = async (userData) => {
   export const updateUser = async (formData) => {
     try {
       // Log what's being sent
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-      }
+      // for (let pair of formData.entries()) {
+      //   console.log(pair[0] + ': ' + pair[1]);
+      // }
       
       const response = await api.put('/users/profile/edit', formData, {
         headers: {

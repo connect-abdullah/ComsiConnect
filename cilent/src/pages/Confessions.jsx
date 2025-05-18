@@ -29,7 +29,7 @@ const Confessions = () => {
         
         const confessionsData = await getConfessions()
         setConfessions(confessionsData)
-        console.log("confessionsData from confessions js --> ", confessionsData);
+        // console.log("confessionsData from confessions js --> ", confessionsData);
       } catch (error) {
         console.error('Error initializing confession page:', error)
       } finally {

@@ -22,7 +22,7 @@ router.post("/signup", async (req, res) => {
       rollNumber: username 
     });
     
-    console.log("User --> ", user);
+    // console.log("User --> ", user);
     await User.register(user, password);
     res
       .status(200).json({ message: "Account created successfully! Please log in." });

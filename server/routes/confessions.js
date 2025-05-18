@@ -155,7 +155,7 @@ router.put("/my-posts/:postId", async (req, res) => {
 
     const { postId } = req?.params;
     const { content } = req?.body;
-    console.log("content->>", content)
+    // console.log("content->>", content)
     
     const updatedPost = await Confession.findOneAndUpdate(
       { _id: postId },
@@ -167,7 +167,7 @@ router.put("/my-posts/:postId", async (req, res) => {
       return res.status(404).json({ message: 'Post not found' });
     }
 
-    console.log("updatedPost --> ", updatedPost);
+    // console.log("updatedPost --> ", updatedPost);
     res.status(200).json(updatedPost);
   } catch (error) {
     console.error('Post update error:', error);
