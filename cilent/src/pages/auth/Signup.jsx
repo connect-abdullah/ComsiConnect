@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 import Navbar from "../../components/LandingPage/Navbar";
 import { signupUser } from "../../api/api";
+import Aurora from '../../components/Aurora';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -84,8 +85,19 @@ const Signup = () => {
   };
 
   return (
-    <div className="bg-zinc-900 text-white min-h-screen flex flex-col">
+    <div className="relative bg-zinc-900 text-white min-h-screen flex flex-col">
+      {/* Aurora Background */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <Aurora
+          colorStops={["#3A29FF", "#4F46E5", "#FF3232"]}
+          blend={0.8}
+          amplitude={1.3}
+          speed={0.9}
+        />
+      </div>
+      
       {/* Navbar */}
+      <div className="relative z-10">
         <Navbar />
 
 
@@ -100,7 +112,7 @@ const Signup = () => {
           <div className="bg-zinc-800 rounded-xl border border-zinc-700 shadow-xl overflow-hidden">
             {/* Form Header */}
             <div className="bg-gradient-to-r from-indigo-700 to-indigo-600 px-6 py-8 text-center">
-              <h2 className="text-2xl font-bold mb-2">Join ComsiConnect Connect</h2>
+              <h2 className="text-2xl font-bold mb-2">Join ComsiConnect</h2>
               <p className="text-indigo-200">
                 Create your account to get started
               </p>
@@ -324,9 +336,10 @@ const Signup = () => {
 
           {/* Decorative Element */}
           <div className="mt-8 text-center text-zinc-500 text-sm">
-            <p>© 2025 ComsiConnect Connect. All rights reserved.</p>
+            <p>© 2025 ComsiConnect. All rights reserved.</p>
           </div>
         </motion.div>
+      </div>
       </div>
     </div>
   );

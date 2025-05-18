@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { FaEnvelope, FaUser, FaPhone, FaPaperPlane, FaMapMarkerAlt, FaClock } from 'react-icons/fa'
 import Navbar from '../../components/LandingPage/Navbar'
 import Footer from '../../components/LandingPage/Footer'
+import Aurora from '../../components/Aurora'
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -48,9 +49,15 @@ const Contact = () => {
       <div className="flex-grow">
         {/* Hero Section */}
         <section className="relative py-16 px-6 md:px-20 overflow-hidden">
-          {/* Background Elements */}
-          <div className="absolute top-20 right-0 w-64 h-64 bg-indigo-600/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-10 left-10 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl"></div>
+          {/* Aurora Background */}
+          <div className="absolute inset-0 z-0 overflow-hidden">
+            <Aurora
+              colorStops={["#3A29FF", "#4F46E5", "#FF3232"]}
+              blend={0.8}
+              amplitude={1.3}
+              speed={0.9}
+            />
+          </div>
           
           <div className="max-w-4xl mx-auto text-center relative z-10">
             <motion.h1 
@@ -210,48 +217,41 @@ const Contact = () => {
                 </p>
               </div>
               
-              {/* Contact Cards */}
-              <div className="space-y-6">
-                {/* Location */}
-                <div className="flex items-start gap-4 p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-                  <div className="bg-indigo-600/20 p-3 rounded-lg">
-                    <FaMapMarkerAlt className="text-indigo-400 text-xl" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-lg">Our Location</h3>
-                    <p className="text-zinc-400">COMSATS University Islamabad, Park Road, Tarlai Kalan, Islamabad</p>
-                  </div>
-                </div>
-                
-                {/* Email */}
-                <div className="flex items-start gap-4 p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-                  <div className="bg-indigo-600/20 p-3 rounded-lg">
-                    <FaEnvelope className="text-indigo-400 text-xl" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-lg">Email Us</h3>
-                    <p className="text-zinc-400">support@comsatsconnect.edu.pk</p>
-                    <p className="text-zinc-400">info@comsatsconnect.edu.pk</p>
-                  </div>
-                </div>
-                
-                {/* Hours */}
-                <div className="flex items-start gap-4 p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
-                  <div className="bg-indigo-600/20 p-3 rounded-lg">
-                    <FaClock className="text-indigo-400 text-xl" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-lg">Working Hours</h3>
-                    <p className="text-zinc-400">Monday - Friday: 9:00 AM - 5:00 PM</p>
-                    <p className="text-zinc-400">Saturday - Sunday: Closed</p>
-                  </div>
-                </div>
-              </div>
               
-              {/* Map or Image */}
-              <div className="mt-8 rounded-xl overflow-hidden border border-zinc-700 h-64 bg-zinc-800 flex items-center justify-center">
-                <p className="text-zinc-400">Campus Map Placeholder</p>
-                {/* In a real implementation, you would add a map here */}
+              {/* Interactive App Mockup */}
+              <div className="mt-8 relative h-64 w-full">
+                <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl overflow-hidden border border-zinc-700 shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-300">
+                  {/* Browser-style header with realistic controls */}
+                  <div className="h-8 bg-zinc-700 flex items-center px-3 gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 transition-colors"></div>
+                    <div className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-400 transition-colors"></div>
+                    <div className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-400 transition-colors"></div>
+                    <div className="ml-4 bg-zinc-600 rounded-md h-4 w-40 flex items-center justify-center">
+                      <div className="w-3/4 h-2 bg-zinc-500 rounded-full"></div>
+                    </div>
+                  </div>
+                  {/* App content with interactive elements */}
+                  <div className="p-4 space-y-4">
+                    {/* Header with avatar and username */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-xs font-bold shadow-lg">CS</div>
+                      <div className="space-y-1">
+                        <div className="h-4 w-24 bg-zinc-700 rounded-md"></div>
+                        <div className="h-2 w-16 bg-zinc-700/70 rounded-md"></div>
+                      </div>
+                      <div className="ml-auto h-6 w-6 rounded-full bg-zinc-700 flex items-center justify-center">
+                        <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
+                      </div>
+                    </div>
+                    {/* Message interface */}
+                    <div className="space-y-2 relative overflow-hidden">
+                      <div className="h-4 w-3/4 bg-zinc-700 rounded-md"></div>
+                      <div className="h-20 bg-gradient-to-r from-zinc-700 via-zinc-600 to-zinc-700 rounded-md relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-500/10 to-transparent shimmer"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </motion.div>
           </div>

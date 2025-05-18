@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { FaGraduationCap, FaUsers, FaLaptopCode, FaBriefcase, FaHandshake, FaUniversity } from 'react-icons/fa'
 import Navbar from '../../components/LandingPage/Navbar'
 import Footer from '../../components/LandingPage/Footer'
+import Aurora from '../../components/Aurora'
 
 const About = () => {
   // Animation variants for staggered animations
@@ -31,9 +32,15 @@ const About = () => {
       <Navbar />
       {/* Hero Section */}
       <section className="relative py-20 px-6 md:px-20 overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute top-20 right-0 w-64 h-64 bg-indigo-600/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-10 left-10 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl"></div>
+        {/* Aurora Background */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <Aurora
+            colorStops={["#3A29FF", "#4F46E5", "#FF3232"]}
+            blend={0.8}
+            amplitude={1.3}
+            speed={0.9}
+          />
+        </div>
         
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.h1 
@@ -42,7 +49,7 @@ const About = () => {
             transition={{ duration: 0.7 }}
             className="text-4xl md:text-6xl font-bold mb-6"
           >
-            About <span className="text-indigo-500">ComsiConnect Connect</span>
+            About <span className="text-indigo-500">ComsiConnect</span>
           </motion.h1>
           
           <motion.p 
@@ -72,7 +79,7 @@ const About = () => {
               <div>
                 <h2 className="text-2xl font-bold mb-4">Our Mission</h2>
                 <p className="text-zinc-300">
-                ComsiConnect Connect is dedicated to fostering a vibrant digital ecosystem where the community can collaborate, share knowledge, and build lasting professional relationships. We aim to bridge the gap between academic learning and real-world application by connecting students with alumni, faculty, and industry professionals.
+                ComsiConnect is dedicated to fostering a vibrant digital ecosystem where the community can collaborate, share knowledge, and build lasting professional relationships. We aim to bridge the gap between academic learning and real-world application by connecting students with alumni, faculty, and industry professionals.
                 </p>
               </div>
             </div>
