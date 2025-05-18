@@ -112,7 +112,7 @@ Pull requests are welcome! Feel free to fork the repo and submit improvements.
 
 ## 👨‍💻 Developed By
 
-**\[Muhammad Abdullah]**
+**--> Muhammad Abdullah**
 
 ------------------------------------------
 
