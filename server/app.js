@@ -78,6 +78,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+app.get('/', (req, res) => {
+  res.send('Backend is running ✅');
+});
 app.use("/auth",authRouter);
 app.use("/feed", isAuthenticated,feedRouter);
 app.use("/users", isAuthenticated,usersRouter);
