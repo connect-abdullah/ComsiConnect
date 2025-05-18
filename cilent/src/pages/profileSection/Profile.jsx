@@ -299,8 +299,10 @@ const Profile = () => {
                   {/* Post Content */}
                   <div className={`flex flex-col flex-1 p-3 sm:p-4 ${post?.images?.length > 0 ? 'overflow-y-auto' : ''}`}>
                     {showSavedPosts && (
-                      <div className="mb-2">
-                        <span className="text-indigo-400 font-semibold">@{post?.user?.username}</span>
+                      <div className="mb-2 flex items-center gap-2">
+                        <img onClick={() => navigate(`/view-profile/${post?.user?._id}`)} src={post?.user?.avatar} alt="Profile" className="w-8 h-8 rounded-full hover:cursor-pointer" />
+                        <span onClick={() => navigate(`/view-profile/${post?.user?._id}`)} className="text-white font-semibold hover:cursor-pointer">{post?.user?.fullName}</span>
+                        <span onClick={() => navigate(`/view-profile/${post?.user?._id}`)} className="text-indigo-400 font-semibold hover:cursor-pointer hover:text-indigo-500 text-sm">@{post?.user?.username}</span>
                       </div>
                     )}
                     {post?.content && (

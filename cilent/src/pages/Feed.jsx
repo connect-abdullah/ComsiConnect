@@ -36,17 +36,20 @@ const Feed = () => {
         // Add original post
         allPosts.push(post)
         
-        // Add reposted versions as separate posts
+        // Add reposted versions as separate posts, excluding current user's reposts
         if (post.repostedBy && post.repostedBy.length > 0) {
           post.repostedBy.forEach(reposter => {
-            const repost = {
-              ...post,
-              _id: `${post._id}-repost-${reposter._id}`, // Unique ID for repost
-              repostedByUser: reposter
+            // Only add repost if it's not from the current user
+            if (reposter._id !== user?._id) {
+              const repost = {
+                ...post,
+                _id: `${post._id}-repost-${reposter._id}`, // Unique ID for repost
+                repostedByUser: reposter
+              }
+              // Insert repost at random position
+              const randomIndex = Math.floor(Math.random() * (allPosts.length + 4))
+              allPosts.splice(randomIndex, 0, repost)
             }
-            // Insert repost at random position
-            const randomIndex = Math.floor(Math.random() * (allPosts.length + 4))
-            allPosts.splice(randomIndex, 0, repost)
           })
         }
       })
@@ -296,11 +299,11 @@ const Feed = () => {
             onClick={() => setShowFollowing(!showFollowing)}
             className={`px-4 py-2 rounded-full transition-all ml-4 ${
               showFollowing 
-                ? "bg-indigo-600 text-white" 
-                : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                ? "bg-indigo-600 text-white text-sm max-[375px]:text-xs" 
+                : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 text-sm max-[375px]:text-xs"
             }`}
           >
-            {showFollowing ? "Following" : "All Posts"}
+            {showFollowing ? "Show All Posts" : "Show Following"}
           </button>
         </div>
 
@@ -399,7 +402,7 @@ const Feed = () => {
                   <div className="flex items-center gap-2 sm:gap-3 bg-[#38383f] rounded-lg p-2 w-full mb-4">
                     <FaRetweet className="text-green-400 text-xs sm:text-sm" />
                     <span className="text-xs sm:text-sm">
-                      Reposted by <span className="font-bold text-[#b3bbb6]">@{post?.repostedByUser?.username}</span>
+                      Reposted by <span className="font-bold text-[#b3bbb6] cursor-pointer hover:text-indigo-400" onClick={() => handleViewProfile(post?.repostedByUser?._id)}>@{post?.repostedByUser?.username}</span>
                     </span>
                   </div>
                 )}
