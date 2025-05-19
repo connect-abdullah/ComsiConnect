@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema(
     username: { type: String, required: true, unique: true },
     avatar: {
       type: String,
-      default: "https://dummyimage.com/300x300/000/fff.png&text=Put+Dp+Here",
+      default: "https://dummyimage.com/300x300/000/fff.png&text=Add+Profile+Picture",
     },
     bio: { type: String, default: "" },
     email: { type: String, required: true, unique: true },

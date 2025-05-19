@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = "/api";
+const API_URL = "/api"; // /api 
 
 const api = axios.create({
     baseURL: API_URL,
@@ -175,6 +175,20 @@ export const getPosts = async () => {
     } catch (error) {
         throw error;
     }
+};
+
+// Get all users
+export const getAllUsers = async () => {
+  try {
+    const response = await api.get('/feed/users');
+    if (response.status === 401) {
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
+    return response.data;
+  } catch (error) { 
+    throw error;
+  }
 };
 
 // Interaction api

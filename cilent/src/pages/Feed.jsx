@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import { FaHeart, FaRetweet, FaBookmark, FaImage, FaTimes, FaRegHeart, FaRegBookmark, FaDownload, FaSearch, FaComment, FaTrash } from "react-icons/fa"
 import Navbar from "../components/Navbar"
-import { post, interaction, getPosts, getUser, followUser, getComments, addComment, deleteComment } from "../api/api"
+import { post, interaction, getPosts, getUser, followUser, getComments, addComment, deleteComment, getAllUsers } from "../api/api"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 dayjs.extend(relativeTime)
@@ -16,6 +16,7 @@ const Feed = () => {
   const [loading, setLoading] = useState(true)
   const fileInputRef = useRef(null)
   const [user, setUser] = useState()
+  const [allUsers, setAllUsers] = useState([])
   const [isPosting, setIsPosting] = useState(false)
   const [modalImage, setModalImage] = useState(null)
   const [followedStatus, setFollowedStatus] = useState({})
@@ -32,6 +33,13 @@ const Feed = () => {
   const COMMENTS_INCREMENT = 4 // Additional comments to load
   const navigate = useNavigate()
 
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      setUser(await getUser())
+    }
+    fetchUser()
+  }, [])
 
   // Fetch all posts and process them to include reposts
   useEffect(() => {
@@ -69,38 +77,34 @@ const Feed = () => {
     fetchPosts()
   }, [user?._id])
 
-  // Handle search input change
-  const handleSearchChange = (e) => {
-    const query = e.target.value
-    setSearchQuery(query)
-
-    if (query.trim()) {
-      const filteredUsers = posts?.reduce((acc, post) => {
-        const user = post?.user
-        if (!acc.some(u => u._id === user?._id) && 
-            (user?.fullName?.toLowerCase().includes(query.toLowerCase()) || 
-             user?.username?.toLowerCase().includes(query.toLowerCase()))) {
-          acc.push(user)
-        }
-        return acc
-      }, [])
-      setSearchResults(filteredUsers || [])
-    } else {
-      setSearchResults([])
-    }
+// Add a useEffect to fetch all users when component mounts
+useEffect(() => {
+  const fetchAllUsers = async () => {
+    const users = await getAllUsers()
+    setAllUsers(users || [])
   }
+  fetchAllUsers()
+}, [])
 
+// Update the handleSearchChange function to search through all users
+const handleSearchChange = (e) => {
+  const query = e.target.value
+  setSearchQuery(query)
+
+  if (query.trim()) {
+    const filteredUsers = allUsers.filter(user => 
+      user?.fullName?.toLowerCase().includes(query.toLowerCase()) || 
+      user?.username?.toLowerCase().includes(query.toLowerCase())
+    )
+    setSearchResults(filteredUsers || [])
+  } else {
+    setSearchResults([])
+  }
+}
   // Handle text input change
   const handleContentChange = (e) => {
     setNewPostContent(e.target.value)
   }
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      setUser(await getUser())
-    }
-    fetchUser()
-  }, [])
 
   // Handle image selection
   const handleImageSelect = (e) => {
@@ -528,24 +532,43 @@ const Feed = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex items-center gap-2 mb-1 sm:mb-0">
-                        <span className="font-medium text-sm sm:text-base truncate cursor-pointer" onClick={() => handleViewProfile(post?.user?._id)}>{post?.user?.fullName}</span>
-                        <span className="text-zinc-400 text-xs sm:text-sm">@{post?.user?.username}</span>
+                      <div className="flex items-center justify-between w-full sm:w-auto sm:justify-start gap-2 mb-1 sm:mb-0">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-xs sm:text-base truncate cursor-pointer max-[338px]:text-[0.7rem]" onClick={() => handleViewProfile(post?.user?._id)}>{post?.user?.fullName}</span>
+                            <span className="text-zinc-400 text-xs max-[338px]:text-[0.5rem]">@{post?.user?.username}</span>
+                          </div>
+                          <span className="hidden sm:block text-zinc-500 text-xs sm:text-sm">{dayjs(post?.createdAt).fromNow()}</span>
+                        </div>
+                         {/* Follow button (mobile only) */}
+                        {post?.user?._id !== user?._id && (
+                          <button
+                            onClick={() => handleFollowUser(post?.user?._id, post?.user?.isFollowed ? "unfollow" : "follow")}
+                            className={`sm:hidden text-xs px-3 py-1 rounded-full transition-all ${
+                              post?.user?.isFollowed
+                                ? "bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30"
+                                : "bg-indigo-600 text-white hover:bg-indigo-700"
+                            }`}
+                          >
+                            {post?.user?.isFollowed ? "Following" : "Follow"}
+                          </button>
+                        )}
                       </div>
+                      {/* Follow button (desktop only) */}
                       {post?.user?._id !== user?._id && (
                         <button
-                          onClick={() => handleFollowUser(post.user._id, post.user.isFollowed ? "unfollow" : "follow")}
-                          className={`text-xs px-3 py-1 rounded-full transition-all self-start mt-1 sm:mt-0 ${
-                            post.user.isFollowed
+                          onClick={() => handleFollowUser(post?.user?._id, post?.user?.isFollowed ? "unfollow" : "follow")}
+                          className={`hidden sm:block text-xs px-3 py-1 rounded-full transition-all ${
+                            post?.user?.isFollowed
                               ? "bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30"
                               : "bg-indigo-600 text-white hover:bg-indigo-700"
                           }`}
                         >
-                          {post.user.isFollowed ? "Following" : "Follow"}
+                          {post?.user?.isFollowed ? "Following" : "Follow"}
                         </button>
                       )}
                     </div>
-                    <span className="block text-zinc-500 text-xs sm:text-sm">{dayjs(post?.createdAt).fromNow()}</span>
+                    <span className="block sm:hidden text-zinc-500 text-xs max-[338px]:text-[10px]">{dayjs(post?.createdAt).fromNow()}</span>
                   </div>
                 </div>
 

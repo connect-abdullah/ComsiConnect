@@ -157,6 +157,15 @@ router.get('/posts', async (req, res) => {
   }
 });
 
+  // Get all users
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.find().select('-password');
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
 
 
 // Follow User 
