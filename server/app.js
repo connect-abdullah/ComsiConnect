@@ -18,7 +18,7 @@ var app = express();
 import cors from "cors";
 app.use(
   cors({
-    origin: [process.env.Frontend_URL, "http://localhost:5173"], // Your frontend URLs
+    origin: [process.env.Frontend_URL, "http://localhost:5173"], 
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -59,8 +59,9 @@ app.use(
     }),
     cookie: {
       maxAge: 24 * 60 * 60 * 1000,
-      sameSite: "none", 
-      secure: true  
+      sameSite: process.env.VIEW === "production" ? "none" : "lax", 
+      secure: process.env.VIEW === "production" ? true : false,
+      httpOnly: process.env.VIEW === "production" ? false : true
     },
   })
 );
@@ -85,6 +86,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.get('/', (req, res) => {
   res.send('Backend is running ✅');
 });
+
 app.use("/auth",authRouter);
 app.use("/feed", isAuthenticated,feedRouter);
 app.use("/users", isAuthenticated,usersRouter);

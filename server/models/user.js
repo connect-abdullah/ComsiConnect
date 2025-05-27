@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema(
     repostedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
     likedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
     posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
-    anonymousID: { type: String, unique: true , default: ""},
+    anonymousID: { type: String, sparse: true, unique: true },
     confessionPosts: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Confession" },
     ],

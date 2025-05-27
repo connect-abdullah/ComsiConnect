@@ -3,13 +3,14 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import User from "../models/user.js";
 import nodemailer from "nodemailer";
+
 import dotenv from 'dotenv';
 dotenv.config();
 
 const router = express.Router();
 
 // Configure Passport Strategy
-passport.use(new LocalStrategy(User.authenticate()));
+// passport.use(new LocalStrategy(User.authenticate()));
 
 // Register route
 router.post("/signup", async (req, res) => {
@@ -42,7 +43,7 @@ router.post("/login", (req, res, next) => {
         .json({ message: info?.message || "Invalid email or password" });
 
     req.logIn(user, (err) => {
-      if (err) return next(err);
+      if (err) return next(err);   
       // Return user info and optionally a token (if you decide to implement JWT later)
       return res.status(200).json({ user });
     });
