@@ -30,7 +30,7 @@ ComsiConnect is a full-stack social media web application designed for students 
 - MongoDB (via Mongoose)
 - Passport.js for auth
 - Multer (image upload), bcrypt.js
-- Deployment: **Render**
+- Deployment: **Render/Railway/Koyeb**
 
 ---
 
