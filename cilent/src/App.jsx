@@ -15,12 +15,15 @@ import VerifyOTP from "./pages/auth/VerifyOTP";
 import ViewProfile from "./pages/profileSection/ViewProfile";
 import FollowList from './pages/profileSection/FollowList';
 import ChatBot from "./pages/Chat.jsx";
+import { UserProvider } from "./auth/UserContext";
+
 
 function App() {
   return (
-    <Routes>
-       {/* Public Routes */}
-      <Route path="/" element={<Home />} />
+    <UserProvider>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/about" element={<About />} />
@@ -39,6 +42,7 @@ function App() {
       <Route path="/profile/:userId/:type" element={<FollowList />} />
       <Route path="/chat" element={<ProtectedRoute><ChatBot /></ProtectedRoute>} />
     </Routes>
+    </UserProvider>
   );
 }
 

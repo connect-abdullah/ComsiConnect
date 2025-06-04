@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import { FaHeart, FaRetweet, FaBookmark, FaImage, FaTimes, FaRegHeart, FaRegBookmark, FaDownload, FaSearch, FaComment, FaTrash } from "react-icons/fa"
 import Navbar from "../components/Navbar"
-import { post, interaction, getPosts, getUser, followUser, getComments, addComment, deleteComment, getAllUsers } from "../api/api"
+import { post, interaction, getPosts, followUser, getComments, addComment, deleteComment, getAllUsers } from "../api/api"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 dayjs.extend(relativeTime)
@@ -35,20 +35,17 @@ const Feed = () => {
 
 
   useEffect(() => {
-    const fetchUser = async () => {
-      setUser(await getUser())
-    }
-    fetchUser()
-  }, [])
+    const fetchAllData = async () => {
+      const response = await getAllUsers()
+      setUser(response.currentUser)
+      setAllUsers(response.users)
 
-  // Fetch all posts and process them to include reposts
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const response = await getPosts()
+      // Now fetch posts, since you have user info
+      const postsResponse = await getPosts()
       
       // Process posts to include reposts as separate entries
       let allPosts = []
-      response?.posts?.forEach(post => {
+      postsResponse?.posts?.forEach(post => {
         // Add original post
         allPosts.push(post)
         
@@ -71,35 +68,31 @@ const Feed = () => {
       })
 
       setPosts(allPosts)
-      setFollowingPosts(response?.followingPosts)
+      setFollowingPosts(postsResponse?.followingPosts)
       setLoading(false)
     }
-    fetchPosts()
-  }, [user?._id])
-
-// Add a useEffect to fetch all users when component mounts
-useEffect(() => {
-  const fetchAllUsers = async () => {
-    const users = await getAllUsers()
-    setAllUsers(users || [])
-  }
-  fetchAllUsers()
-}, [])
+    fetchAllData()
+  }, [])
 
 // Update the handleSearchChange function to search through all users
 const handleSearchChange = (e) => {
   const query = e.target.value
   setSearchQuery(query)
 
-  if (query.trim()) {
-    const filteredUsers = allUsers.filter(user => 
-      user?.fullName?.toLowerCase().includes(query.toLowerCase()) || 
-      user?.username?.toLowerCase().includes(query.toLowerCase())
-    )
-    setSearchResults(filteredUsers || [])
-  } else {
-    setSearchResults([])
-  }
+  // Debounce the search filtering
+  const timeoutId = setTimeout(() => {
+    if (query.trim()) {
+      const filteredUsers = allUsers.filter(user => 
+        user?.fullName?.toLowerCase().includes(query.toLowerCase()) || 
+        user?.username?.toLowerCase().includes(query.toLowerCase())
+      )
+      setSearchResults(filteredUsers || [])
+    } else {
+      setSearchResults([])
+    }
+  }, 500)
+
+  return () => clearTimeout(timeoutId)
 }
   // Handle text input change
   const handleContentChange = (e) => {
@@ -743,8 +736,8 @@ const handleSearchChange = (e) => {
                                 </button>
                               )}
                             </div>
-                            <div className="bg-zinc-700/50 rounded-lg p-3 mt-2">
-                              <p className="text-sm text-zinc-100">{comment?.content}</p>
+                            <div className="bg-zinc-700/50 rounded-lg p-3 mt-2 break-words max-w-full overflow-hidden">
+                              <p className="text-sm text-zinc-100 whitespace-pre-wrap break-all">{comment?.content}</p>
                             </div>
                           </div>
                         </motion.div>

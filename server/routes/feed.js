@@ -60,17 +60,17 @@ router.put('/post/:postId', async (req, res) => {
   const interactions = {
     like: {
       flag: 'isLiked',
-      userArray: 'likedPosts',
+      userArray: 'likedPosts', 
       postArray: 'likedBy',
     },
     save: {
-      flag: 'isSaved', 
+      flag: 'isSaved',
       userArray: 'savedPosts',
       postArray: 'savedBy'
     },
     repost: {
-      flag: 'isReposted',
-      userArray: 'repostedPosts', 
+      flag: 'isReposted', 
+      userArray: 'repostedPosts',
       postArray: 'repostedBy',
     }
   };
@@ -87,7 +87,11 @@ router.put('/post/:postId', async (req, res) => {
   }
 
   await Promise.all([post.save(), user.save()]);
-  const populatedPost = await post?.populate('user');
+  
+  const populatedPost = await Post.findById(postId)
+    .select('_id content images createdAt isLiked isSaved likedBy repostedBy')
+    .populate('user', '_id avatar fullName username');
+
   res.status(200).json(populatedPost);
 });
 
@@ -99,58 +103,64 @@ router.get('/posts', async (req, res) => {
 
     // All Posts
     let posts = await Post.find()
-      .populate('user')
-      .populate('repostedBy')
-      .lean(); 
+      .select('_id content images createdAt isLiked isSaved likedBy repostedBy comments')
+      .populate('user', '_id avatar fullName username followers')
+      .populate('repostedBy', '_id username')
+      .populate({
+        path: 'comments',
+        select: '_id content createdAt',
+        populate: {
+          path: 'user',
+          select: '_id avatar fullName username'
+        }
+      })
+      .lean();
 
-      // Following Posts
-    let followingPosts = await Post.find({
+    // Following Posts  
+    let followingPosts = await Post.find({ 
       user: { $in: currentUser.following }
-    }).populate('user').lean();
+    })
+    .select('_id content images createdAt isLiked isSaved likedBy repostedBy comments')
+    .populate('user', '_id avatar fullName username followers')
+    .populate('repostedBy', '_id username')
+    .populate({
+      path: 'comments',
+      select: '_id content createdAt',
+      populate: {
+        path: 'user',
+        select: '_id avatar fullName username'
+      }
+    })
+    .lean();
 
-    // Add isFollowed flag to following posts
-    followingPosts = followingPosts.map(post => {
-      const isFollowed = post.user?.followers?.some(followerId =>
-        followerId.toString() === currentUser._id.toString()
-      );
-
-      return {
+    // Add isFollowed flag
+    const addIsFollowed = (posts) => {
+      return posts.map(post => ({
         ...post,
         user: {
           ...post.user,
-          isFollowed
+          isFollowed: post.user?.followers?.some(followerId => 
+            followerId.toString() === currentUser._id.toString()
+          )
         }
-      };
-    });
+      }));
+    };
 
-    // Add isFollowed to each post.user
-    posts = posts.map(post => {
-      const isFollowed = post.user?.followers?.some(followerId =>
-        followerId.toString() === currentUser._id.toString()
-      );
+    posts = addIsFollowed(posts);
+    followingPosts = addIsFollowed(followingPosts);
 
-      return {
-        ...post,
-        user: {
-          ...post.user,
-          isFollowed
-        }
-      };
-    });
+    // Weighted shuffle: favor newer posts but allow randomness
+    const now = new Date().getTime();
+    posts = posts
+      .map(post => {
+        const ageInMinutes = (now - new Date(post.createdAt).getTime()) / (1000 * 60);
+        const score = Math.random() * Math.exp(-ageInMinutes / 60); // decays over ~1hr
+        return { post, score };
+      })
+      .sort((a, b) => b.score - a.score)
+      .map(p => p.post);
 
-
-      // Weighted shuffle: favor newer posts but allow randomness
-      const now = new Date().getTime();
-      posts = posts
-        .map(post => {
-          const ageInMinutes = (now - new Date(post.createdAt).getTime()) / (1000 * 60);
-          const score = Math.random() * Math.exp(-ageInMinutes / 60); // decays over ~1hr
-          return { post, score };
-        })
-        .sort((a, b) => b.score - a.score)
-        .map(p => p.post);
-
-    res.status(200).json({posts, followingPosts});
+    res.status(200).json({ posts, followingPosts });
   } catch (err) {
     console.error("Error in /posts:", err);
     res.status(500).json({ error: "Failed to fetch posts" });
@@ -160,13 +170,20 @@ router.get('/posts', async (req, res) => {
   // Get all users
 router.get('/users', async (req, res) => {
   try {
-    const users = await User.find().select('-password');
-    res.status(200).json(users);
+    const currentUser = await User.findOne({ username: req?.session?.passport?.user })
+      .select('_id avatar fullName username');
+
+    const users = await User.find()
+      .select('_id avatar fullName username');
+
+    res.status(200).json({
+      users,
+      currentUser
+    });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch users" });
   }
 });
-
 
 // Follow User 
 router.post('/follow/:userId', async (req,res) => {

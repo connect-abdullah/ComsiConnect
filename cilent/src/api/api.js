@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const API_URL = "/api"; // /api 
+// const API_URL = "http://localhost:3000";
 
 const api = axios.create({
     baseURL: API_URL,
@@ -118,10 +119,12 @@ export const getPosts = async () => {
 // Get all users
 export const getAllUsers = async () => {
   const response = await api.get('/feed/users');
+  console.log("response --> ", response.data);
   if (response.status === 401) {
     window.location.href = '/login';
     throw new Error('Unauthorized');
   }
+
   return response.data;
 };
 
@@ -176,16 +179,6 @@ export const deleteComment = async (postId, commentId) => {
 };
 
 // Profile Routes
-// Get all posts for signed user
-export const getUserPosts = async () => {
-  const response = await api.get('/users/posts');
-  if (response.status === 401) {
-    window.location.href = '/login';
-    throw new Error('Unauthorized');
-  }
-  return response;
-};
-
 // Update a post
 export const updatePost = async (postId, content) => {
   const response = await api.put(`/users/posts/${postId}`, content);

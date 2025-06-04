@@ -10,22 +10,47 @@ import fetch from 'node-fetch'; // npm install node-fetch
 
 const router = express.Router();
 
-// Configure Passport Strategy
-// passport.use(new LocalStrategy(User.authenticate()));
-
 
 // Profile Routes
 // Get user profile
 router.get('/profile', async (req, res) => {
-  const user = await User.findOne({ username: req?.session?.passport?.user }).select('-password');
-  // console.log("User from user route --> ", user);
-
   if (!req.session?.passport?.user) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
-  res.status(200).json(user);
-});
 
+  const user = await User.findOne({ username: req?.session?.passport?.user })
+    .select('_id fullName username bio department postsCount followersCount followingCount avatar savedPosts');
+
+  const posts = await Post.find({ user: user?._id })
+    .populate('user', '_id avatar fullName username')
+    .select('_id content createdAt images likedBy repostedBy');
+
+  // Add interaction flags to each post
+  const postsWithFlags = posts.map(post => {
+    const postObj = post.toObject();
+    return {
+      _id: postObj._id,
+      content: postObj.content,
+      createdAt: postObj.createdAt,
+      images: postObj.images,
+      isLiked: post.likedBy?.includes(user._id),
+      isSaved: user.savedPosts?.includes(post._id),
+      likedBy: postObj.likedBy,
+      repostedBy: postObj.repostedBy,
+      user: postObj.user
+    };
+  });
+
+  const savedPosts = await Post.find({ _id: { $in: user.savedPosts } })
+    .populate('user', '_id avatar fullName username')
+    .select('_id content createdAt images likedBy repostedBy');
+
+  res.status(200).json({
+    user,
+    posts: postsWithFlags,
+    savedPosts
+  });
+});
 // Update user profile
 router.put('/profile/edit', upload.single('file'), async (req, res) => {
   try {
@@ -53,15 +78,6 @@ router.put('/profile/edit', upload.single('file'), async (req, res) => {
     console.error('Profile update error:', error);
     res.status(500).json({ message: error.message || 'Error updating profile' });
   }
-});
-
-// Get all posts for signed user
-router.get('/posts', async (req, res) => {
-  const user = await User.findOne({ username: req?.session?.passport?.user });
-  const posts = await Post.find({ user: user?._id }).populate('user');
-  const savedPosts = await Post.find({ _id: { $in: user.savedPosts } }).populate('user');
-  // console.log("posts --> ", savedPosts)
-  res.status(200).json({posts, savedPosts});
 });
 
 // Update a post
@@ -120,17 +136,35 @@ router.delete("/posts/:postId", async (req, res) => {
 
 // Get other user profile 
 router.get('/view-profile/:id', async (req, res) => {
+  if (!req.session?.passport?.user) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
   const { id } = req.params;
-  const user = await User.findOne({ _id: id }).select('-password');
-  const posts = await Post.find({ user: id }).populate('user');
-  res.status(200).json({user, posts});
+  const currentUser = await User.findOne({ username: req.session.passport.user });
+  const user = await User.findOne({ _id: id })
+    .select('fullName username bio department postsCount followersCount followingCount avatar followers following')
+    .populate("posts");
+
+  // Only include followers/following arrays if current user is in them
+  const responseUser = {
+    ...user.toObject(),
+    followers: user.followers.includes(currentUser._id) ? user.followers : [],
+    following: user.following.includes(currentUser._id) ? user.following : []
+  };
+  console.log("responseUser --> ", responseUser);
+
+  res.status(200).json({ user: responseUser });
 });
 
 // Get followers list
 router.get('/profile/:id', async (req, res) => {
   const { id } = req.params;
-  const user = await User.findOne({ _id: id }).select('-password');
-  await user.populate(['followers', 'following']);
+  const user = await User.findOne({ _id: id })
+    .select('_id followers following')
+    .populate('followers', '_id avatar fullName username')
+    .populate('following', '_id avatar fullName username');
+
   res.status(200).json({user});
 });
 

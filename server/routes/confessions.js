@@ -8,8 +8,8 @@ import Confession from '../models/confessions.js';
 
 const router = express.Router();
 
-// Configure Passport Strategy
-passport.use(new LocalStrategy(User.authenticate()));
+// // Configure Passport Strategy
+// passport.use(new LocalStrategy(User.authenticate()));
 
 // Get anonymous ID
 router.get('/anonymous-id', async (req, res) => {
@@ -22,12 +22,24 @@ router.get('/anonymous-id', async (req, res) => {
       
       // If user doesn't have an anonymous ID, create one
       if (!user.anonymousID) {
-        const adjectives = ["Chill", "Brave", "Sneaky", "Clever", "Swift", "Silent", "Fierce", "Calm"];
-        const animals = ["Fox", "Wolf", "Tiger", "Panda", "Hawk", "Koala", "Otter", "Raven"];
+        const adjectives = [
+          "Toxic", "Feral", "Deranged", "Cursed", "Woke", "Horny", "Lazy", "Unhinged",
+          "Triggered", "Cringe", "Savage", "Shady", "Fanatic", "Zesty", "Oblivious"
+        ];
+        
+        const nouns = [
+          "Goblin", "NPC", "Simp", "Karen", "Hamster", "Boomer", "Wizard", "Chad",
+          "Cactus", "Neckbeard", "Doomer", "Lurker", "Toaster", "Otaku", "Weeb", "Crusader", "Simp"
+        ];
+        
+        const suffixes = ["420", "69", "XD", "UwU", "_IRL", "1337", "666", "0xBAD"];
+        
         const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-        const animal = animals[Math.floor(Math.random() * animals.length)];
-        const number = Math.floor(10 + Math.random() * 90);
-        const anonymousID = `${adj}${animal}${number}`;
+        const noun = nouns[Math.floor(Math.random() * nouns.length)];
+        const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+        
+        const anonymousID = `${adj}${noun}${suffix}`;
+        
         
         user.anonymousID = anonymousID;
         await user.save();
@@ -74,10 +86,13 @@ router.get('/anonymous-id', async (req, res) => {
   // Get all confessions
   router.get('/all-posts', async (req, res) => {
     try {
-      const confessions = await Confession.find().populate('user').lean();
-  
+      const confessions = await Confession.find()
+        .populate('user')
+        .lean()
+        .select('_id content images createdAt anonymousID isLiked likedBy isSaved');
+
       const now = new Date().getTime();
-      const shuffledConfessions = confessions
+      const sortedConfessions = confessions
         .map(confession => {
           const ageInMinutes = (now - new Date(confession.createdAt).getTime()) / (1000 * 60);
           const score = Math.random() * Math.exp(-ageInMinutes / 60); // Decay factor: ~1hr
@@ -85,8 +100,8 @@ router.get('/anonymous-id', async (req, res) => {
         })
         .sort((a, b) => b.score - a.score)
         .map(item => item.confession);
-  
-      res.status(200).json(shuffledConfessions);
+
+      res.status(200).json(sortedConfessions);
     } catch (err) {
       console.error("Error in /all-posts:", err);
       res.status(500).json({ error: "Failed to fetch confessions" });
@@ -140,8 +155,9 @@ router.get('/anonymous-id', async (req, res) => {
   router.get('/my-posts', async (req, res) => {
     const user = await User.findOne({username : req?.session?.passport?.user});
     
-    const confessions = await Confession.find({ user: user?._id }).populate('user');
-    // console.log("confessions from confessions js --> ", confessions);
+    const confessions = await Confession.find({ user: user?._id }).select('_id content anonymousID images createdAt updatedAt isLiked isSaved likedBy');
+    console.log("confessions from confessions js --> ", confessions);
+
 
     res.status(200).json(confessions)
   });

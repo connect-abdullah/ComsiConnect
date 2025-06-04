@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { motion } from 'framer-motion'
 import { useLocation, Link } from 'react-router-dom'
-import { getUser, logoutUser } from '../api/api'
+import { logoutUser } from '../api/api'
 import { useNavigate } from 'react-router-dom';
+import { useUser } from "../auth/UserContext";
 
 const Navbar = () => {
   const location = useLocation();
   const currentPath = location.pathname;
   const navigate = useNavigate();
+  const { user } = useUser();
 
-  const [user, setUser] = useState();
   // Determine if a path is active
   const isActive = (path) => {
     if (path === '/') {
@@ -19,17 +20,9 @@ const Navbar = () => {
     return currentPath.startsWith(path);
   };
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const user = await getUser();
-      setUser(user);
-    }
-    fetchUser();
-  }, []);
-
-  const handleLogoClick = async () => {
-    const user = await getUser();
-    if (user) {
+  const handleLogoClick = () => {
+    const token = localStorage.getItem('token');
+    if (token) {
       navigate('/feed');
     } else {
       navigate('/');
@@ -39,8 +32,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await logoutUser();
-      localStorage.removeItem('token'); // Remove auth token
-      setUser(null); // Clear user state
+      localStorage.removeItem('token'); // Remove auth token  
       navigate('/login'); 
     } catch (error) {
       console.error('Logout failed:', error);
@@ -113,7 +105,7 @@ const Navbar = () => {
           <div className="relative group">
             <div className="block">
               <div className="w-9 h-9 bg-indigo-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-indigo-700 transition duration-200">
-                <img src={user?.avatar} alt={user?.fullName} className="w-full h-full object-cover rounded-full" />
+                <img src={user?.avatar} alt="Profile" className="w-full h-full object-cover rounded-full" />
               </div>
             </div>
             

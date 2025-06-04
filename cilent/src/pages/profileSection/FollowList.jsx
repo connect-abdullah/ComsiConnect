@@ -1,40 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { IoArrowBack } from 'react-icons/io5';
-import { getList, followUser, getUser } from '../../api/api';
+import { getList, followUser } from '../../api/api';
 import Navbar from '../../components/Navbar';
 
 const FollowList = () => {
   const navigate = useNavigate();
   const { type, userId } = useParams();
   const [users, setUsers] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null);
-
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const userData = await getUser();
-        setCurrentUser(userData);
-      } catch (error) {
-        console.error('Error fetching current user:', error);
-      }
-    };
-
-    fetchCurrentUser();
-  }, []);
+  const [userData, setUserData] = useState(null);
 
   const fetchUsers = async () => {
     try {
       const response = await getList(userId);
+      console.log("response --> ", response);
+      setUserData(response.user);
+
       if (type === 'followers') {
-        const followersWithStatus = response?.user?.followers?.map(user => ({
-          ...user,
-          isFollowed: user.followers?.includes(currentUser?._id)
+        const followersWithStatus = response.user.followers.map(user => ({
+          _id: user._id,
+          fullName: user.fullName,
+          username: user.username,
+          avatar: user.avatar,
+          isFollowed: response.user.following.some(u => u._id === user._id)
         }));
         setUsers(followersWithStatus);
       } else {
-        const followingWithStatus = response?.user?.following?.map(user => ({
-          ...user,
+        const followingWithStatus = response.user.following.map(user => ({
+          _id: user._id,
+          fullName: user.fullName,
+          username: user.username,
+          avatar: user.avatar,
           isFollowed: true
         }));
         setUsers(followingWithStatus);
@@ -45,10 +41,8 @@ const FollowList = () => {
   };
 
   useEffect(() => {
-    if (currentUser) {
-      fetchUsers();
-    }
-  }, [userId, type, currentUser]);
+    fetchUsers();
+  }, [userId, type]);
 
   const handleFollowUser = async (userId, action) => {
     if (!userId) return;
@@ -56,8 +50,8 @@ const FollowList = () => {
     try {
       const response = await followUser(userId, { action });
 
-      if (response?.status === 200 || response?.status === 201) {
-        const { isFollowed } = response?.data;
+      if (response.status === 200 || response.status === 201) {
+        const { isFollowed } = response.data;
 
         setUsers(prevUsers =>
           prevUsers.map(user => {
@@ -116,41 +110,41 @@ const FollowList = () => {
               >
                 <div 
                   className="flex items-center cursor-pointer"
-                  onClick={() => navigate(`/view-profile/${user?._id}`)}
+                  onClick={() => navigate(`/view-profile/${user._id}`)}
                 >
                   {/* Avatar */}
                   <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center">
-                    {user?.avatar ? (
+                    {user.avatar ? (
                       <img 
-                        src={user?.avatar} 
-                        alt={user?.fullName}
+                        src={user.avatar} 
+                        alt={user.fullName}
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
                       <span className="font-bold text-xl">
-                        {user?.fullName?.charAt(0)}
+                        {user.fullName?.charAt(0)}
                       </span>
                     )}
                   </div>
                   
                   {/* User Info */}
                   <div className="ml-4">
-                    <h2 className="font-bold text-lg text-white">{user?.fullName}</h2>
-                    <p className="text-zinc-400 text-sm">@{user?.username}</p>
+                    <h2 className="font-bold text-lg text-white">{user.fullName}</h2>
+                    <p className="text-zinc-400 text-sm">@{user.username}</p>
                   </div>
                 </div>
 
                 {/* Follow Button */}
-                {currentUser && currentUser?._id !== user?._id && (
+                {userData && userData._id !== user._id && (
                   <button
-                    onClick={() => handleFollowUser(user?._id, user?.isFollowed ? "unfollow" : "follow")}
+                    onClick={() => handleFollowUser(user._id, user.isFollowed ? "unfollow" : "follow")}
                     className={`text-xs px-3 py-1 rounded-full transition-all ${
-                      user?.isFollowed
+                      user.isFollowed
                         ? "bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30"
                         : "bg-indigo-600 text-white hover:bg-indigo-700"
                     }`}
                   >
-                    {user?.isFollowed ? "Following" : "Follow"}
+                    {user.isFollowed ? "Following" : "Follow"}
                   </button>
                 )}
               </div>

@@ -11,10 +11,11 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
-import { logoutUser, getUser, getUserPosts, interaction, updatePost, deletePost } from "../../api/api";
+import { logoutUser, getUser,  interaction, updatePost, deletePost } from "../../api/api";
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime);
+import { useUser } from "../../auth/UserContext";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -26,32 +27,21 @@ const Profile = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showSavedPosts, setShowSavedPosts] = useState(false);
   const [savedPosts, setSavedPosts] = useState([]);
+  const { setUser } = useUser();
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await getUser();
-        setUserData(response);
+        setUserData(response?.user);
+        setPosts(response?.posts);
+        setSavedPosts(response?.savedPosts || []);
+        setUser(response?.user);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     };
     fetchUserData();
-  }, []);
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await getUserPosts();
-        // console.log("response from profile jsx (fetch user posts) --> ", response.data);
-        setPosts(response.data.posts);
-        setSavedPosts(response.data.savedPosts || []); 
-        // console.log("savedPosts --> ", response.data.savedPosts);
-      } catch (error) {
-        console.error("Error fetching posts:", error);
-      }
-    };
-    fetchPosts();
   }, []);
 
   const handlePostInteraction = async (postId, interactionType) => {
@@ -119,7 +109,9 @@ const Profile = () => {
       if(response.status === 200){
         setPosts(prev => prev.filter(p => p._id !== postId));
         setSavedPosts(prev => prev.filter(p => p._id !== postId));
-        setUserData(data);
+        if(data){
+          setUserData(data);
+        }
       } else {
         console.error('Failed to delete post:', response);
       }
@@ -136,7 +128,7 @@ const Profile = () => {
   return (
     <div className="bg-zinc-900 text-white min-h-screen">
       {/* Navbar */}
-      <Navbar />
+      <Navbar dp={userData?.avatar}/>
 
       <div className="max-w-4xl mx-auto px-4 py-6">
         {/* Profile Header Section */}

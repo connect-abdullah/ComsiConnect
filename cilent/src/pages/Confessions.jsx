@@ -165,7 +165,7 @@ const Confessions = () => {
             <h1 className="text-xl font-bold">ComsiConnect Confessions</h1>
             <Link 
               to="/my-confessions" 
-              className="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white font-medium transition flex items-center gap-2"
+              className="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white font-medium transition flex items-center gap-2 whitespace-nowrap"
             >
               My Confessions <span className="text-lg">→</span>
             </Link>

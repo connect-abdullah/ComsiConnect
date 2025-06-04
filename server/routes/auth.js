@@ -44,8 +44,14 @@ router.post("/login", (req, res, next) => {
 
     req.logIn(user, (err) => {
       if (err) return next(err);   
-      // Return user info and optionally a token (if you decide to implement JWT later)
-      return res.status(200).json({ user });
+      return res.status(200).json({ 
+        user: {
+          _id: user._id,
+          username: user.username,
+          fullName: user.fullName,
+          avatar: user.avatar
+        }
+      });
     });
   })(req, res, next);
 });

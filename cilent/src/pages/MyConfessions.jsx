@@ -201,11 +201,6 @@ const MyConfessions = () => {
                     <span>{confession.likedBy?.length || 0}</span>
                   </div>
 
-                  <div className="flex items-center gap-1 text-zinc-400">
-                    <FaRetweet className={confession.isReposted ? "text-green-500" : ""} />
-                    <span>{confession.repostedBy?.length || 0}</span>
-                  </div>
-
                   <div className="text-zinc-400">
                     <FaBookmark className={confession.isSaved ? "text-indigo-400" : ""} />
                   </div>

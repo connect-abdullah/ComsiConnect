@@ -9,7 +9,7 @@ import {
   FaRegBookmark,
 } from "react-icons/fa";
 import Navbar from "../../components/Navbar";
-import { interaction, viewProfile, followUser, getUser } from "../../api/api";
+import { interaction, viewProfile, followUser } from "../../api/api";
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime);
@@ -17,21 +17,7 @@ dayjs.extend(relativeTime);
 const ViewProfile = () => {
   const [userData, setUserData] = useState();
   const [posts, setPosts] = useState();
-  const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const userData = await getUser();
-        setCurrentUser(userData);
-      } catch (error) {
-        console.error('Error fetching current user:', error);
-      }
-    };
-
-    fetchCurrentUser();
-  }, []);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -40,18 +26,17 @@ const ViewProfile = () => {
         const response = await viewProfile(id);
         const userWithFollowStatus = {
           ...response?.user,
-          isFollowed: response?.user?.followers?.includes(currentUser?._id)
+          isFollowed: response?.user?.followers?.length > 0
         };
         setUserData(userWithFollowStatus);
         setPosts(response?.posts);
+        console.log("response --> ", response);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     };
-    if (currentUser) {
-      fetchUserData();
-    }
-  }, [currentUser]);
+    fetchUserData();
+  }, []);
 
   const handleFollowUser = async (userId, action) => {
     if (!userId) return;
@@ -60,7 +45,7 @@ const ViewProfile = () => {
       const response = await followUser(userId, { action });
 
       if (response?.status === 200 || response?.status === 201) {
-        const { isFollowed } = response?.data;
+        const { isFollowed } = response.data;
         setUserData(prevUser => ({
           ...prevUser,
           isFollowed: isFollowed,
@@ -118,18 +103,16 @@ const ViewProfile = () => {
                   <p className="text-zinc-400 mb-1">@{userData?.username}</p>
                   <p className="text-zinc-400 mb-4 text-sm">Department: {userData?.department}</p>
                 </div>
-                {currentUser && currentUser?._id !== userData?._id && (
-                  <button
-                    onClick={() => handleFollowUser(userData?._id, userData?.isFollowed ? "unfollow" : "follow")}
-                    className={`text-xs px-3 py-1 rounded-full transition-all ${
-                      userData?.isFollowed
-                        ? "bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30"
-                        : "bg-indigo-600 text-white hover:bg-indigo-700"
-                    }`}
-                  >
-                    {userData?.isFollowed ? "Following" : "Follow"}
-                  </button>
-                )}
+                <button
+                  onClick={() => handleFollowUser(userData?._id, userData?.isFollowed ? "unfollow" : "follow")}
+                  className={`text-xs px-3 py-1 rounded-full transition-all ${
+                    userData?.isFollowed
+                      ? "bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30"
+                      : "bg-indigo-600 text-white hover:bg-indigo-700"
+                  }`}
+                >
+                  {userData?.isFollowed ? "Following" : "Follow"}
+                </button>
               </div>
 
               <p className="text-zinc-200 mb-6 font-bold">{userData?.bio}</p>
@@ -164,18 +147,18 @@ const ViewProfile = () => {
             Posts
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {posts && posts.length === 0 ? (
+            {!posts || posts.length === 0 ? (
               <div className="col-span-2 text-center py-12 bg-zinc-800 rounded-xl border border-zinc-700">
                 <FaBookmark className="mx-auto text-4xl text-zinc-600 mb-4" />
                 <h3 className="text-xl font-semibold text-zinc-300 mb-2">
-                  No Posts
+                  No Posts Yet
                 </h3>
                 <p className="text-zinc-400">
-                  No posts to display
+                  This user hasn't made any posts
                 </p>
               </div>
             ) : (
-              posts && posts.map((post) => (
+              posts.map((post) => (
                   <motion.div
                     key={post._id}
                     initial={{ opacity: 0, y: 20 }}
@@ -184,14 +167,14 @@ const ViewProfile = () => {
                     className={`relative flex flex-col bg-zinc-800 rounded-xl border border-zinc-700 shadow-lg ${post?.images?.length > 0 ? 'max-h-[500px] md:max-h-[600px] lg:max-h-[500px]' : 'max-h-fit'}`}
                   >
                     {/* Post Images Container - Only show if images exist */}
-                    {post?.images?.length > 0 ? (
+                    {post?.images?.length > 0 && (
                       <div className="h-[200px] sm:h-[250px] md:h-[300px] overflow-hidden">
                         <div
                           className={`grid ${
-                            post?.images?.length > 1 ? "grid-cols-2" : "grid-cols-1"
+                            post.images.length > 1 ? "grid-cols-2" : "grid-cols-1"
                           } gap-1 p-3 h-full`}
                         >
-                          {post?.images?.map((image, index) => (
+                          {post.images.map((image, index) => (
                             <img
                               key={index}
                               src={image}
@@ -201,7 +184,7 @@ const ViewProfile = () => {
                           ))}
                         </div>
                       </div>
-                    ) : null}
+                    )}
 
                     {/* Post Content */}
                     <div className={`flex flex-col flex-1 p-3 sm:p-4 ${post?.images?.length > 0 ? 'overflow-y-auto' : ''}`}>
