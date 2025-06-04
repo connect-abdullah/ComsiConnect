@@ -28,6 +28,7 @@ const Profile = () => {
   const [showSavedPosts, setShowSavedPosts] = useState(false);
   const [savedPosts, setSavedPosts] = useState([]);
   const { setUser } = useUser();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -39,6 +40,8 @@ const Profile = () => {
         setUser(response?.user);
       } catch (error) {
         console.error("Error fetching user data:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchUserData();
@@ -124,6 +127,14 @@ const Profile = () => {
 
   // Get the posts to display based on showSavedPosts toggle
   const displayPosts = showSavedPosts ? savedPosts : posts;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-zinc-900 flex items-center justify-center">
+        <div className="w-16 h-16 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-zinc-900 text-white min-h-screen">
