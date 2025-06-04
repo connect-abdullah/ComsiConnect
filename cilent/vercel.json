@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://comsiconnect-production.up.railway.app/:path*"
+      "destination": "https://strong-jordan-connect-abdullah-1eea3005.koyeb.app/:path*"
     },
     {
       "source": "/(.*)",
