@@ -9,6 +9,7 @@ const FollowList = () => {
   const { type, userId } = useParams();
   const [users, setUsers] = useState([]);
   const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchUsers = async () => {
     try {
@@ -37,6 +38,8 @@ const FollowList = () => {
       }
     } catch (error) {
       console.error('Error fetching users:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,6 +72,17 @@ const FollowList = () => {
       console.error("Failed to follow/unfollow user:", error);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="bg-zinc-900 text-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+          <p>Loading {type === 'followers' ? 'followers' : 'following'} list...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-zinc-900 text-white min-h-screen">

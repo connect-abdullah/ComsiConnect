@@ -130,8 +130,11 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-900 flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+      <div className="bg-zinc-900 text-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+          <p>Loading your profile...</p>
+        </div>
       </div>
     );
   }
